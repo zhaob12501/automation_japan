@@ -1,0 +1,24 @@
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+*.spec
+dist
+build
+__pycache__
+
+# My configurations:
+db.ini
+settings.py
+.html
+.png
+.jpg
+.pdf
+*.exe
+user_pwd
