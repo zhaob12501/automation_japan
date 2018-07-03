@@ -27,7 +27,10 @@ class Login:
         self.agent_code_url = 'https://churenkyosystem.com/member/get_china_agent_data.php?mode=MODE_EDIT'
         # 确认信息url
         self.confirm_url = 'https://churenkyosystem.com/member/identity_edit.php?mode=add'
-        self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        else:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
 
         print('in Login')
 
@@ -126,7 +129,7 @@ class Login:
 
             sleep(1)
 
-            if self.LOG_DATA[9] and self.LOG_DATA[6] != '团体查证':
+            if not self.LOG_DATA[9] and self.LOG_DATA[9] != self.LOG_DATA[3] and self.LOG_DATA[6] != '团体查证':
                 japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
                 data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 requests.post(japan_url, data=data)

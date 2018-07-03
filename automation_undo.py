@@ -18,23 +18,65 @@ class Undo:
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'
         self.identity_name_url = 'https://churenkyosystem.com/member/identity_name_list.php?IDENTITY_ID={}'
         self.i_nup_e_url = 'https://churenkyosystem.com/member/identity_nameupload_edit.php?IDENTITY_ID={}'
-        self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        # self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        else:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
         print('进入搜索信息搜索列表，并搜索指定ID')
-        data = {
-            'CODE': self.LOG_DATA[-1],
-            'PAGE_VIEW_NUMBER': '0',
-            'BTN_SEARCH_x': '検 索',
-        }
+        print(self.LOG_DATA[8])
+        if self.LOG_DATA[8]:
+            print('检索信息-有番号查询')
+            data = {
+                'CODE': self.LOG_DATA[8],
+                'PAGE_VIEW_NUMBER': '0',
+                'BTN_SEARCH_x': '検 索',
+            }
 
-        res = self.req.post(self.identity_list_url, data=data)
-        reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[-1])
-        self.identity_id = re.findall(reg, res.text)[0]
-        print(self.identity_id)
+            res = self.req.post(self.identity_list_url, data=data)
+            reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[8])
+            self.identity_id = re.findall(reg, res.text)[0]
+            print('The Transmission first step to success!')
+            print(self.identity_id)
+        else:
+            # 1、 进入搜索信息搜索列表，并搜索指定ID
+            # def search_info(self):
+            print('检索信息-无番号查询')
+            try:
+                res = self.req.get(self.identity_list_url)
+                if res.url == self.login_url:
+                    c = client.ClientLogin()
+                    c.run
+                    self.req = c.req
+                    res = self.req.get(self.identity_list_url)
+                self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
+                print('The Transmission first step to success!')
+                print(self.identity_id)
+                    
+            except:
+                for i in range(1, 21):
+                    ne = '?p={}&s=1&d=2'.format(i)
+                    url = self.identity_list_url + ne
+                    res = self.req.get(url)
+                    if res.url == self.login_url:
+                        c = client.ClientLogin()
+                        c.run
+                        self.req = c.req
+                        res = self.req.get(url)
+                    try:
+                        self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
+                        print('The Transmission first step to success!')
+                        self.get_url = url
+                        break
+                    except:
+                        continue
+                else:
+                    print('Your records are too old. Please resubmit your information!...')
        
 
     # 2、执行撤销操作

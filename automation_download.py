@@ -17,7 +17,10 @@ class Download:
         self.SLFH = self.LOG_DATA[8]
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
-        self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        else:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
         print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'

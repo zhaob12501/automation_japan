@@ -20,7 +20,11 @@ class Transmission:
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'
         self.identity_name_url = 'https://churenkyosystem.com/member/identity_name_list.php?IDENTITY_ID={}'
         self.i_nup_e_url = 'https://churenkyosystem.com/member/identity_nameupload_edit.php?IDENTITY_ID={}'
-        self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        # self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        else:
+            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
         print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'

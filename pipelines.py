@@ -135,13 +135,13 @@ class AutomationPipelines:
                 res_2[0], 
                 res_3[0], 
                 '{} {}'.format(res_3[1], res_3[2]), 
-                res_3[3] - 1 if not res_1[7] else res_1[7] - 1,
+                res_3[3] - 1 ,
                 res_1[1].replace('-', '/').strip(), 
                 res_1[2].replace('-', '/').strip(), 
                 res_1[3],
                 res_1[5],
                 res_1[6],
-                res_1[7],
+                res_1[7] if not res_1[7] else res_1[7] - 1,
             )
             print(self.log_data)
 
