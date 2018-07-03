@@ -14,6 +14,7 @@ class Download:
         # requests.utils.add_dict_to_cookiejar(self.req.cookies, client.getCookies())
         self.LOG_DATA = LOG_DATA
         self.DOWN_DATA = DOWN_DATA
+        self.SLFH = self.LOG_DATA[8]
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
         self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
@@ -25,37 +26,55 @@ class Download:
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
-        print('检索信息')
-        try:
-            res = self.req.get(self.identity_list_url)
-            if res.url == self.login_url:
-                c = client.ClientLogin()
-                c.run
-                self.req = c.req
-                res = self.req.get(self.identity_list_url)
+        print('进入搜索信息搜索列表，并搜索指定ID')
+        print(self.LOG_DATA[8])
+        if self.LOG_DATA[8]:
+            print('检索信息-有番号查询')
+            data = {
+                'CODE': self.LOG_DATA[8],
+                'PAGE_VIEW_NUMBER': '0',
+                'BTN_SEARCH_x': '検 索',
+            }
+
+            res = self.req.post(self.identity_list_url, data=data)
+            reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[8])
+            self.identity_id = re.findall(reg, res.text)[0]
             print('The Transmission first step to success!')
-            
-            self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
             print(self.identity_id)
-                
-        except:
-            for i in range(2, 21):
-                ne = '?p={}&s=1&d=2'.format(i)
-                url = self.identity_list_url + ne
-                res = self.req.get(url)
+        else:
+            # 1、 进入搜索信息搜索列表，并搜索指定ID
+            # def search_info(self):
+            print('检索信息-无番号查询')
+            try:
+                res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
                     c = client.ClientLogin()
                     c.run
                     self.req = c.req
+                    res = self.req.get(self.identity_list_url)
+                self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
+                print('The Transmission first step to success!')
+                print(self.identity_id)
+                    
+            except:
+                for i in range(1, 21):
+                    ne = '?p={}&s=1&d=2'.format(i)
+                    url = self.identity_list_url + ne
                     res = self.req.get(url)
-                try:
-                    self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
-                    print('The Transmission first step to success!')
-                    break
-                except:
-                    continue
-            else:
-                print('Your records are too old. Please resubmit your information!...')
+                    if res.url == self.login_url:
+                        c = client.ClientLogin()
+                        c.run
+                        self.req = c.req
+                        res = self.req.get(url)
+                    try:
+                        self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
+                        print('The Transmission first step to success!')
+                        self.get_url = url
+                        break
+                    except:
+                        continue
+                else:
+                    print('Your records are too old. Please resubmit your information!...')
 
     def identity_return(self):
         url = self.id_r_e_url.format(self.identity_id)
@@ -67,8 +86,8 @@ class Download:
             self.req = c.req
             res = self.req.get(url)
         
-        reg = r'<tr><th>受付番号</th><td colspan="3">(.*?)</td></tr>'
-        self.SLFH = re.findall(reg, res.text)[0]
+        # reg = r'<tr><th>受付番号</th><td colspan="3">(.*?)</td></tr>'
+        # self.SLFH = re.findall(reg, res.text)[0]
         print('The Download second step is successful')
         reg = '<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
@@ -116,7 +135,7 @@ class Download:
             c.run
             self.req = c.req
             res = self.req.get(url)
-        reg = '<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
+        reg = r'<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
         print('The Download third step is successful')
 
@@ -135,7 +154,7 @@ class Download:
         print('Download the fourth step is successful')
 
     def down(self):
-        url = 'https://churenkyosystem.com/member' + self.down_url + self.identity_id
+        url = 'https://churenkyosystem.com/member' + self.down_url
         print(url)
 
         res = self.req.get(url)
@@ -144,28 +163,32 @@ class Download:
             c.run
             self.req = c.req
             res = self.req.get(url)
-        with open(os.path.join(BASE_DIR, '{}.pdf'.format(self.SLFH)), 'wb') as f:
+        with open('{}.pdf'.format(self.SLFH), 'wb') as f:
             f.write(res.content)
-        file = {self.SLFH: open(os.path.join(BASE_DIR, '{}.pdf'.format(self.SLFH)), 'rb')}
+        file = {self.SLFH: open('{}.pdf'.format(self.SLFH), 'rb')}
 
         url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdf'
-        data = {'tid': self.LOG_DATA[-1]}
+        data = {'tid': f'{self.LOG_DATA[7]}'}
         print(data)
         res = requests.post(url, data=data, files=file)
+        print(res.json())
+        if res.json()['status'] == 1:
+            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
+            res = requests.post(japan_url, data=data).json()
+            print(res)
 
+            print('-' * 20, '\nthe info is OK\n', '-' * 20)
+            with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
+                log = {'归国': self.DOWN_DATA, 'time': strftime('%m/%d %H:%M:%S')}
+                json.dump(log, f)
+                f.write(',\n')
+            # print('Download Step 5 Success, PDF Download Complete')
+            # print('Please open the D:\visa path to view the file')
+            print('归国报告书下载OK\n')
         japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        data = {'tid': self.LOG_DATA[-1], 'status': '3', 'submit_status': '222'}
-        res = requests.post(japan_url, data=data).json()
-        print(res)
-
-        print('-' * 20, '\nthe info is OK\n', '-' * 20)
-        with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
-            log = {'归国': self.DOWN_DATA, 'time': strftime('%m/%d %H:%M:%S')}
-            json.dump(log, f)
-            f.write(',\n')
-        # print('Download Step 5 Success, PDF Download Complete')
-        # print('Please open the D:\visa path to view the file')
-        print('归国报告书下载OK\n')
+        data = {'tid': self.LOG_DATA[7], 'status': '2'}
+        res = requests.post(japan_url, data=data)
     
     @property 
     def run(self):

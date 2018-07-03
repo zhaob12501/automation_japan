@@ -16,9 +16,10 @@ __pycache__
 # My configurations:
 db.ini
 settings.py
-.html
-.png
-.jpg
-.pdf
+*.json
+*.html
+*.png
+*.jpg
+*.pdf
 *.exe
 user_pwd

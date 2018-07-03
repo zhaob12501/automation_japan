@@ -98,7 +98,7 @@ class Run:
                     del self.tid
                 except:
                     pass
-                print('刷新成功...等待20秒...')
+                print('刷新成功...等待2分钟...')
                 print(strftime('%m/%d %H:%M:%S'))
 
                 path = BASE_DIR
@@ -114,7 +114,7 @@ class Run:
                 except:
                     print('.xls no del')
 
-                sleep(20)
+                sleep(120)
                 continue
 
             up = self.auto.undo_p()

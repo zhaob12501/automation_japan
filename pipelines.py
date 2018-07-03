@@ -1,4 +1,6 @@
 import pymysql
+import requests
+
 from settings import DJ_NAME, POOL
 
 
@@ -87,18 +89,24 @@ class AutomationPipelines:
             # self.travel_name = tuple([i[0] for i in self.travel_name])
 
             # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list WHERE status = 1 and travel_name in {self.travel_name}'
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list WHERE status = 1 and travel_name in {self.travel_name}'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
 
             if not res_1:
-                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list WHERE status = 2 and travel_name in {self.travel_name}'
+                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list WHERE status = 2 and travel_name in {self.travel_name}'
                 self.cur.execute(sql)
                 res_1 = self.cur.fetchone()
                 if not res_1:
                     print('无需要提交数据')
                     return 0
             self.tid = res_1[5]
+            
+            if res_1[8] == '222':
+                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                data = {'tid': self.tid, 'status': '3'}
+                requests.post(japan_url, data=data)
+
             # 旅行社番号
             sql = 'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{}"'.format(
                 res_1[0])
@@ -136,10 +144,6 @@ class AutomationPipelines:
                 res_1[7],
             )
             print(self.log_data)
-            if res_1[7]:
-                self.res_info = ()
-                self.down_data = ()
-                return 1
 
         except Exception as e:
             print('in log data error')
@@ -205,6 +209,7 @@ class AutomationPipelines:
         sql = f'SELECT submit_status FROM dc_travel_business_list where tid = {tid}'
         self.cur.execute(sql)
         res = self.cur.fetchone()[0]
+        print(res)
         return res
 
     def __del__(self):

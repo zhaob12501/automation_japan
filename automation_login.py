@@ -10,6 +10,7 @@ from settings import *
 
 class Login:
     def __init__(self, REQ, LOG_DATA):
+        print('in Login...')
         self.req = REQ
         self.LOG_DATA = LOG_DATA
         print(self.LOG_DATA)
@@ -26,8 +27,19 @@ class Login:
         self.agent_code_url = 'https://churenkyosystem.com/member/get_china_agent_data.php?mode=MODE_EDIT'
         # 确认信息url
         self.confirm_url = 'https://churenkyosystem.com/member/identity_edit.php?mode=add'
-        
+        self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+
         print('in Login')
+
+    def validation(self):
+        print('in Login validation')
+        res = self.req.get('https://churenkyosystem.com/member/identity_list.php')
+        if self.info in res.text:
+            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
+            requests.post(japan_url, data=data).json()
+            return 0
+        return 1
 
     # 第三步 跳转至信息录入页面，并检测番号
     def top(self):
@@ -114,7 +126,7 @@ class Login:
 
             sleep(1)
 
-            if self.LOG_DATA[9]:
+            if self.LOG_DATA[9] and self.LOG_DATA[6] != '团体查证':
                 japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
                 data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 requests.post(japan_url, data=data)
@@ -230,18 +242,22 @@ class Login:
     @property
     def run(self):
         try:
-            self.top()
+            if self.validation():
+                self.top()
 
-            sleep(2)
+                sleep(2)
 
-            self.confirm()
+                self.confirm()
 
-            sleep(2)
+                sleep(2)
 
-            self.con_two() 
-            print('=========')
+                self.con_two() 
+                print('=========')
             return 1
-        except:
+        except Exception as e:
+            print('Log error')
+            print(e)
+            sleep(5)
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()

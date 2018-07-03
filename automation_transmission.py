@@ -32,6 +32,7 @@ class Transmission:
         print('进入搜索信息搜索列表，并搜索指定ID')
         print(self.LOG_DATA[8])
         if self.LOG_DATA[8]:
+            print('检索信息-有番号查询')
             data = {
                 'CODE': self.LOG_DATA[8],
                 'PAGE_VIEW_NUMBER': '0',
@@ -44,9 +45,9 @@ class Transmission:
             print('The Transmission first step to success!')
             print(self.identity_id)
         else:
-#     # 1、 进入搜索信息搜索列表，并搜索指定ID
-    # def search_info(self):
-            print('检索信息')
+            # 1、 进入搜索信息搜索列表，并搜索指定ID
+            # def search_info(self):
+            print('检索信息-无番号查询')
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
@@ -77,7 +78,7 @@ class Transmission:
                         continue
                 else:
                     print('Your records are too old. Please resubmit your information!...')
-#     
+     
     def upload_one(self):
         
         url = self.identity_name_url.format(self.identity_id)
