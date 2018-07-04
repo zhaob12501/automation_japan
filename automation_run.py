@@ -68,8 +68,9 @@ class Run:
 
     # @try_exc
     def undo_run(self):
-        self.LOG_DATA = self.auto.undo_data
-        self.und = Undo(self.cli.req, self.LOG_DATA)
+        log_data = self.auto.undo_data
+        print(log_data)
+        self.und = Undo(self.cli.req, log_data)
         self.und.run
         self.req_r = self.und.req
 
@@ -120,7 +121,7 @@ class Run:
             up = self.auto.undo_p()
             # 判断是否需要撤销
             print('是否需要撤销:(1/0): ', up)
-            if up:                    
+            if up:              
                 self.undo_run()
                 sleep(1)
                 continue
@@ -141,18 +142,14 @@ class Run:
                 print('提交数据失败')
                 
             sleep(1)
-            self.status = self.auto.status(self.tid)
             try:
                 if self.status == '211':
-                    self.auto.data()
-                    self.all_data()
                     self.tra_run()
             except Exception as e:
                 print(e)
                 print('xls文件上传失败')
                 
             sleep(1)
-            self.status = self.auto.status(self.tid)
             try:
                 if self.status == '221':
                     print('归国报告书下载')

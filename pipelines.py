@@ -41,7 +41,7 @@ class AutomationPipelines:
             # self.travel_name = tuple([i[0] for i in self.travel_name])
 
             # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf FROM dc_travel_business_list WHERE submit_status = 3 and travel_name in {self.travel_name}'
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list WHERE submit_status = 3 and travel_name in {self.travel_name}'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
             if not res_1:
@@ -70,7 +70,8 @@ class AutomationPipelines:
                 res_1[2].replace('-', '/').strip(),
                 res_1[3],
                 res_1[5],
-                res_1[6]
+                res_1[6],
+                res_1[7] if not res_1[7] else res_1[7] - 1,
             )
             print(self.undo_data)
             return 1

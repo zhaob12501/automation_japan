@@ -123,13 +123,12 @@ class Login:
             print(e)
 
         if res.url == 'https://churenkyosystem.com/member/identity_edit.php?mode=add' and res.status_code == 200:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-            requests.post(japan_url, data=data).json()
-
-            sleep(1)
-
-            if not self.LOG_DATA[9] and self.LOG_DATA[9] != self.LOG_DATA[3] and self.LOG_DATA[6] != '团体查证':
+            if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
+                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
+                requests.post(japan_url, data=data).json()
+                sleep(1)
+            else:
                 japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
                 data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 requests.post(japan_url, data=data)

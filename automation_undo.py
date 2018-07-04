@@ -11,6 +11,7 @@ from settings import *
 
 class Undo:
     def __init__(self, req, LOG_DATA):
+        print('in Undo...')
         self.req = req
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
