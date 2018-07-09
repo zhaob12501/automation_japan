@@ -27,7 +27,7 @@ class Login:
         self.agent_code_url = 'https://churenkyosystem.com/member/get_china_agent_data.php?mode=MODE_EDIT'
         # 确认信息url
         self.confirm_url = 'https://churenkyosystem.com/member/identity_edit.php?mode=add'
-        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+        if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])

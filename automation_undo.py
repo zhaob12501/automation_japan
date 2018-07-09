@@ -20,7 +20,7 @@ class Undo:
         self.identity_name_url = 'https://churenkyosystem.com/member/identity_name_list.php?IDENTITY_ID={}'
         self.i_nup_e_url = 'https://churenkyosystem.com/member/identity_nameupload_edit.php?IDENTITY_ID={}'
         # self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
-        if self.LOG_DATA[3] == self.LOG_DATA[9]:
+        if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
@@ -60,7 +60,7 @@ class Undo:
                 print(self.identity_id)
                     
             except:
-                for i in range(1, 21):
+                for i in range(1, 31):
                     ne = '?p={}&s=1&d=2'.format(i)
                     url = self.identity_list_url + ne
                     res = self.req.get(url)
@@ -77,7 +77,9 @@ class Undo:
                     except:
                         continue
                 else:
-                    print('Your records are too old. Please resubmit your information!...')
+                    japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                    data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
+                    res = requests.post(japan_url, data=data)
        
 
     # 2、执行撤销操作
