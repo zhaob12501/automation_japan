@@ -182,4 +182,5 @@ if __name__ == '__main__':
         finally:
             print('等待1分钟重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
+            os.system('taskkill /f /im chrome.exe')
             sleep(60)

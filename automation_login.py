@@ -38,10 +38,12 @@ class Login:
         print('in Login validation')
         res = self.req.get('https://churenkyosystem.com/member/identity_list.php')
         if self.info in res.text:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-            requests.post(japan_url, data=data).json()
-            return 0
+            invalid = res.text.split(self.info)[0].split('<a href="identity_info.php?IDENTITY_ID')[-1]
+            if '発行済' in invalid:
+                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
+                requests.post(japan_url, data=data)
+                return 0
         return 1
 
     # 第三步 跳转至信息录入页面，并检测番号

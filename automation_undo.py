@@ -96,7 +96,7 @@ class Undo:
         sleep(3)
 
         japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        data = {'tid': self.LOG_DATA[-2], 'submit_status': '111'}
+        data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
         res = requests.post(japan_url, data=data).json()
         if res['status'] == 1:
             print('==========\n撤回请求成功!\n==========')
