@@ -201,8 +201,10 @@ class Download:
             self.identity_return()
             sleep(1)
             self.down()
-        except:
-            pass
+        except Exception as e:
+            print('automation_download 出现错误...')
+            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
+                f.write(f'["automation_download", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
         sleep(1)
 
 if __name__ == '__main__':

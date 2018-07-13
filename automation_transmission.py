@@ -181,7 +181,10 @@ class Transmission:
                         f.write(',\n')
                 except:
                     pass
-        except:
+        except Exception as e:
+            print('automation_transmission 出现错误...')
+            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
+                f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()

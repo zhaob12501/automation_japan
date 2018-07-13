@@ -1,6 +1,6 @@
 import json
-import re
 import os
+import re
 
 import requests
 
@@ -259,9 +259,10 @@ class Login:
                 print('=========')
             return 1
         except Exception as e:
-            print('Log error')
-            print(e)
-            sleep(5)
+            print('automation_login 出现错误...')
+            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
+                f.write(f'["automation_login", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            sleep(3)
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()

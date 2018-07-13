@@ -11,7 +11,6 @@ from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
 from settings import *
 
-
 # def try_exc(fun):
 #     def _te(*ages, **kwages):
 #         try:
@@ -108,12 +107,6 @@ class Run:
                         os.remove(infile) 
                 except:
                     print('.pdf no del')
-                
-                try:
-                    for infile in glob.glob(os.path.join(path, '*.xls')):
-                        os.remove(infile) 
-                except:
-                    print('.xls no del')
 
                 sleep(120)
                 continue
@@ -176,9 +169,9 @@ if __name__ == '__main__':
             r.run
             
         except Exception as e:
-            print('出现错误...')
+            print('automation_run 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+                f.write(f'["automation_run", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
         finally:
             print('等待1分钟重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')

@@ -120,3 +120,9 @@ class ClientLogin:
         else:
             return 1
 
+
+if __name__ == '__main__':
+    print(getCookies())
+    sleep(5)
+    open_client()
+    input('---')
