@@ -188,6 +188,7 @@ class Transmission:
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()
+            assert 'transmission error' == '' 
         sleep(1)
         
 

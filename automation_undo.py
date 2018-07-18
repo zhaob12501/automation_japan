@@ -126,3 +126,4 @@ class Undo:
             print('automation_undo 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_undo", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            assert 'undo error' == '' 

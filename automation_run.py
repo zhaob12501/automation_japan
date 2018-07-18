@@ -128,29 +128,18 @@ class Run:
             # 获取需要申请的人员信息
             self.all_data()
             self.status = self.auto.status(self.tid)
-            try:
-                if self.status == '111':
-                    self.log_run()
-            except:
-                print('提交数据失败')
+            if self.status == '111':
+                self.log_run()
                 
             sleep(1)
-            try:
-                if self.status == '211':
-                    self.tra_run()
-            except Exception as e:
-                print(e)
-                print('xls文件上传失败')
+            if self.status == '211':
+                self.tra_run()
                 
             sleep(1)
-            try:
-                if self.status == '221':
-                    print('归国报告书下载')
-                    self.dow_run()                        
-            except Exception as e:
-                print(e)
-                print('归国报告书下载失败')
-            sleep(3)
+            if self.status == '221':
+                print('归国报告书下载')
+                self.dow_run()                        
+            sleep(1)
             
 
 
