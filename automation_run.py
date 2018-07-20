@@ -11,24 +11,12 @@ from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
 from settings import *
 
-# def try_exc(fun):
-#     def _te(*ages, **kwages):
-#         try:
-#             fun(*ages, **kwages)
-#         except Exception as e:
-#             print(e)
-#             sleep(1)
-#             fun(*ages, **kwages)
-#             return
-#     return _te
-
 
 class Run:
     def __init__(self):
         self.data = 0
         self.cli = ClientLogin()
         
-    # @try_exc
     def all_data(self):
         self.LOG_DATA = self.auto.log_data
         self.tid = self.LOG_DATA[7]
@@ -38,34 +26,30 @@ class Run:
         self.DOWN_DATA = self.auto.down_data
         # print(self.DOWN_DATA)
     
-    # 登录--clientLogin
-    # @try_exc    
+    # 登录--clientLogin    
     def cli_run(self):
         if self.cli.run:
             return 1
         self.req_r = self.cli.req
         
     # 提交数据
-    # @try_exc
     def log_run(self):
+        print(self.LOG_DATA)
         self.log = Login(self.cli.req, self.LOG_DATA)
         self.log.run
         self.req_r = self.log.req
 
     # 上传xls文件
-    # @try_exc
     def tra_run(self):
         self.tra = Transmission(self.cli.req, self.LOG_DATA, self.LOG_INFO)
         self.tra.run
         self.req_r = self.tra.req
 		
-    # @try_exc
     def dow_run(self):
         self.dow = Download(self.cli.req, self.LOG_DATA, self.DOWN_DATA)
         self.dow.run
         self.req_r = self.dow.req
 
-    # @try_exc
     def undo_run(self):
         log_data = self.auto.undo_data
         print(log_data)
@@ -79,11 +63,16 @@ class Run:
             return 
         os.system('taskkill /F /IM chrome.exe')
         
-        while 1:
+        while True:
             print('in run...')
             try:
                 self.auto = AutomationPipelines()
+                self.auto.get_travel_name()
             except:
+                try:
+                    del self.auto
+                except:
+                    pass
                 print('数据库连接超时...20秒后重连...')
                 sleep(20)
                 continue
@@ -140,16 +129,17 @@ class Run:
                 print('归国报告书下载')
                 self.dow_run()                        
             sleep(1)
-            
+
+            del self.auto 
 
 
 if __name__ == '__main__':
     # sleep(120)
-    while 1:
+    while True:
         print('in automation_run')
         try:
             open_client()
-            while 1:
+            while True:
                 print('in getCookies')
                 if getCookies():
                     break

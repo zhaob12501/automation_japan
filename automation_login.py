@@ -13,7 +13,7 @@ class Login:
         print('in Login...')
         self.req = REQ
         self.LOG_DATA = LOG_DATA
-        print(self.LOG_DATA)
+        print(len(self.LOG_DATA))
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
 
@@ -268,7 +268,6 @@ class Login:
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()
             print(res)
-            assert 'login error' == '' 
          
 
 if __name__ == '__main__':

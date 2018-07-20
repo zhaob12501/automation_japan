@@ -131,7 +131,15 @@ class Transmission:
         if '登録が完了しました' not in res.text:
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            res = requests.post(japan_url, data=data).json()
+            requests.post(japan_url, data=data)
+            if "errorMsg" in res.text:
+                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                data = {'tid': self.LOG_DATA[7], 'status': '9'}
+                requests.post(japan_url, data=data)
+                errorMsg = res.text.split('<p class="errorMsg">')[1].split('</p>')[0]
+                print(errorMsg)
+                with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
+                    f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{errorMsg}"],\n')
             return -1 
         try:
             
@@ -182,13 +190,12 @@ class Transmission:
                 except:
                     pass
         except Exception as e:
-            print('automation_transmission 出现错误...')
+            print('automation_transmission error...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
             japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             data = {'tid': self.LOG_DATA[7], 'status': '2'}
             res = requests.post(japan_url, data=data).json()
-            assert 'transmission error' == '' 
         sleep(1)
         
 

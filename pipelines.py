@@ -10,7 +10,6 @@ class AutomationPipelines:
         self.con = POOL.connection()
         self.cur = self.con.cursor()
         print('连接成功...')
-        self.get_travel_name()
 
     def get_travel_name(self):
         # 符合条件的旅行社
@@ -23,10 +22,11 @@ class AutomationPipelines:
     @property
     def get_res(self):
         print('in get_res...')
-        sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf FROM dc_travel_business_list WHERE (status = 1 or status = 2 or submit_status = 3) and travel_name in {self.travel_name}'
+        sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf FROM dc_travel_business_list \
+         WHERE (status = 1 or status = 2 or submit_status = 3) and travel_name in {self.travel_name} and visa_type not like "%五年%"'
         self.cur.execute(sql)
         if self.cur.fetchall():
-            print('有数据, 准备提交签证...')
+            print('有数据, 准备提交...')
             return 0
         print('没有数据...')
         return 1
@@ -34,14 +34,9 @@ class AutomationPipelines:
     def undo_p(self):
         try:
             print('in undo_p')
-            # 符合条件的旅行社
-            # sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
-            # self.cur.execute(sql)
-            # self.travel_name = self.cur.fetchall()
-            # self.travel_name = tuple([i[0] for i in self.travel_name])
-
             # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list WHERE submit_status = 3 and travel_name in {self.travel_name}'
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list \
+             WHERE submit_status = 3 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
             if not res_1:
@@ -49,14 +44,14 @@ class AutomationPipelines:
                 return 0
             # print(res_1)
             # 旅行社番号
-            sql = 'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{}"'.format(
-                res_1[0])
+            sql = 'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting \
+             WHERE tid = "{}"'.format(res_1[0])
             self.cur.execute(sql)
             res_2 = self.cur.fetchone()
 
             # 姓名，英文名 人数
-            sql = 'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{}"'.format(
-                res_1[5])
+            sql = 'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo \
+             WHERE tvisa_id = "{}"'.format(res_1[5])
             self.cur.execute(sql)
             res_3 = self.cur.fetchone()
             
@@ -73,10 +68,10 @@ class AutomationPipelines:
                 res_1[6],
                 res_1[7] if not res_1[7] else res_1[7] - 1,
             )
-            print(self.undo_data)
+            # print(self.undo_data)
             return 1
         except Exception as e:
-            print(e, '\n签证人员信息查询失败！...')
+            print(e, '\n人员信息查询失败！...')
             return 0
 
     def data(self):
@@ -90,12 +85,14 @@ class AutomationPipelines:
             # self.travel_name = tuple([i[0] for i in self.travel_name])
 
             # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list WHERE status = 1 and travel_name in {self.travel_name}'
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+             WHERE status = 1 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
 
             if not res_1:
-                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list WHERE status = 2 and travel_name in {self.travel_name}'
+                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                 WHERE status = 2 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
                 self.cur.execute(sql)
                 res_1 = self.cur.fetchone()
                 if not res_1:
@@ -109,27 +106,19 @@ class AutomationPipelines:
                 requests.post(japan_url, data=data)
 
             # 旅行社番号
-            sql = 'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{}"'.format(
-                res_1[0])
+            sql = f'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{res_1[0]}"'
             self.cur.execute(sql)
             res_2 = self.cur.fetchone()
             if res_2 == ():
                 print('res_2 未查到数据')
                 return 0
             # 姓名，英文名 人数
-            sql = 'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{}"'.format(
-                self.tid)
+            sql = f'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{self.tid}"'
             self.cur.execute(sql)
             res_3 = self.cur.fetchone()
             if res_1 == ():
                 print('res_3 未查到数据')
                 return 0
-
-            # res_1 = list(res_1)
-            # try:
-            #     res_1[7] = int(res_1[7]) if int(res_1[7]) > 0 else None
-            # except:
-            #     res_1[7] = None
 
             # 查证信息
             self.log_data = (
@@ -144,15 +133,15 @@ class AutomationPipelines:
                 res_1[6],
                 res_1[7] if not res_1[7] else res_1[7] - 1,
             )
-            print(self.log_data)
+            # print(self.log_data)
 
         except Exception as e:
             print('in log data error')
-            print(e, '\n签证人员信息查询失败！...')
+            print(e, '\n人员信息查询失败！...')
 
         try:
-            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE tvisa_id = "{}"'.format(
-               self.tid)
+            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE \
+             tvisa_id = "{}"'.format(self.tid)
             self.cur.execute(sql)
             res_info = self.cur.fetchall()
             if res_info == ():
@@ -186,8 +175,7 @@ class AutomationPipelines:
             print(e, '\n需要的提交表格数据查询失败！...')
 
         try:
-            sql = 'select flight_name, originating_place, start_time, destination, stop_time from dc_business_tavel_fly where flight_name ="{}" AND fmpid = 0'.format(
-                res_1[4])
+            sql = f'select flight_name, originating_place, start_time, destination, stop_time from dc_business_tavel_fly where flight_name ="{res_1[4]}" AND fmpid = 0'
             self.cur.execute(sql)
             res_4 = self.cur.fetchone()
             if not res_4:
@@ -215,15 +203,16 @@ class AutomationPipelines:
 
     def __del__(self):
         print('\n数据库正在关闭连接')
-        self.cur.close()
-        self.con.close()
-        print('数据库已关闭连接\n')
+        try:
+            self.cur.close()
+        except:
+            print('Cur off failure')
+        try:
+            self.con.close()
+            print('数据库已关闭连接\n')
+        except:
+            print('Con off failure')
 
 
 if __name__ == '__main__':
     pass
-    # p = AutomationPipelines()
-    # print(p.undo_p())
-    # # print(p.undo_data)
-    # print(p.data())
-    # print(p.log_data, p.res_info, p.down_data, sep='\n')
