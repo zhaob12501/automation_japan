@@ -8,9 +8,8 @@ import client
 import create_xls
 from settings import *
 
-
 class Transmission:
-    def __init__(self, req, LOG_DATA, LOG_INFO):
+    def __init__(self, req, LOG_DATA, LOG_INFO, auto):
         self.req = req
         # requests.utils.add_dict_to_cookiejar(self.req.cookies, client.getCookies())
         self.LOG_DATA = LOG_DATA
@@ -30,6 +29,7 @@ class Transmission:
         self.login_url = 'https://churenkyosystem.com/member/login.php'
 
         print('开始准备提交数据')
+        self.auPipe = auto
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
@@ -111,8 +111,6 @@ class Transmission:
         reg = '<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
         
-        
-
     def upload_two(self):
         print('开始提交')
         url = self.i_nup_e_url.split('?')[0]
@@ -129,13 +127,15 @@ class Transmission:
         files = {"CSV_FILE": (f'{VISA}.xls', open(BASE_DIR + f'\\{VISA}.xls', 'rb'), 'application/vnd.ms-excel')}
         res = self.req.post(url, data=data, files=files)
         if '登録が完了しました' not in res.text:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            requests.post(japan_url, data=data)
+            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            # data = {'tid': self.LOG_DATA[7], 'status': '2'}
+            # requests.post(japan_url, data=data)
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             if "errorMsg" in res.text:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'status': '9'}
-                requests.post(japan_url, data=data)
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'status': '9'}
+                # requests.post(japan_url, data=data)
+                self.auPipe.update(tid=self.LOG_DATA[7], status='9')
                 errorMsg = res.text.split('<p class="errorMsg">')[1].split('</p>')[0]
                 print(errorMsg)
                 with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
@@ -147,16 +147,18 @@ class Transmission:
             print('\tFile upload successful!')
             print('\n===xls文件上传完成OK===\n\n')
             if '团体' not in self.LOG_DATA[6]:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
-                res = requests.post(japan_url, data=data).json()
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
+                # res = requests.post(japan_url, data=data).json()
+                self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
                 print(res, '提交完成！\n========\n', sep='\n')
  
             else:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'submit_status': '221'}
-                res = requests.post(japan_url, data=data).json()
-                print(res)
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'submit_status': '221'}
+                # res = requests.post(japan_url, data=data).json()
+                # print(res)
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221')
             return 1
         except:
             return -1
@@ -164,21 +166,9 @@ class Transmission:
     def run(self):
         try:
             self.search_info()
-        except:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            res = requests.post(japan_url, data=data).json()
-        sleep(1)
-
-        try:
+            sleep(1)
             self.upload_one()
-        except:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            res = requests.post(japan_url, data=data).json()
-        sleep(1)
-
-        try:
+            sleep(1)
             s = self.upload_two()
             if s == 1:
                 print(self.LOG_DATA[6])
@@ -193,9 +183,12 @@ class Transmission:
             print('automation_transmission error...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            res = requests.post(japan_url, data=data).json()
+            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            # data = {'tid': self.LOG_DATA[7], 'status': '2'}
+            # res = requests.post(japan_url, data=data).json()
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        finally:
+            del self.auPipe
         sleep(1)
         
 

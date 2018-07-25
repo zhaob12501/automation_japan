@@ -7,9 +7,8 @@ import requests
 import client
 from settings import *
 
-
 class Login:
-    def __init__(self, REQ, LOG_DATA):
+    def __init__(self, REQ, LOG_DATA, auto):
         print('in Login...')
         self.req = REQ
         self.LOG_DATA = LOG_DATA
@@ -33,6 +32,7 @@ class Login:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
 
         print('in Login')
+        self.auPipe = auto
 
     def validation(self):
         print('in Login validation')
@@ -40,9 +40,10 @@ class Login:
         if self.info in res.text:
             invalid = res.text.split(self.info)[0].split('<a href="identity_info.php?IDENTITY_ID')[-1]
             if '発行済' in invalid:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-                requests.post(japan_url, data=data)
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
+                # requests.post(japan_url, data=data)
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
                 return 0
         return 1
 
@@ -84,10 +85,11 @@ class Login:
             print(res.url)
         self.res_info = res.json()
         if self.res_info == []:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '8'}
-            res = requests.post(japan_url, data=data).json()
-            print(res)
+            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            # data = {'tid': self.LOG_DATA[7], 'status': '8'}
+            # res = requests.post(japan_url, data=data).json()
+            # print(res)
+            self.auPipe.update(tid=self.LOG_DATA[7], status='8')
             return -1
         print('指定番号检索完成(指定番号の検索完了)\n番号为(番号を)：\n\t{0}\nID为(IDを)：\n\t{1}\n'
               '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
@@ -123,29 +125,31 @@ class Login:
             print(res.url, res.status_code, sep='\n')
         except Exception as e:
             print(e)
-
+  
         if res.url == 'https://churenkyosystem.com/member/identity_edit.php?mode=add' and res.status_code == 200:
+            try:
+                reg = r'受付番号(.*?)<'
+                self.FH = re.findall(reg, res.text)[0][1:].strip()
+                print(f'\n\n===={self.FH}====\n\n')
+                # url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdftext'
+                # data = {'tid': self.LOG_DATA[7], 'text': self.FH}
+                # res1 = requests.post(url, data=data).json()
+                # print('--', res1)
+            except Exception as e:
+                print(e) 
             if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-                requests.post(japan_url, data=data).json()
-                sleep(1)
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
+                # requests.post(japan_url, data=data).json()
+                # sleep(1)
+                
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
             else:
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
-                requests.post(japan_url, data=data)
-        
-        try:
-            reg = r'受付番号(.*?)<'
-            self.FH = re.findall(reg, res.text)[0][1:].strip()
-            print(f'\n\n===={self.FH}====\n\n')
-            url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdftext'
-            data = {'tid': self.LOG_DATA[7], 'text': self.FH}
-            res1 = requests.post(url, data=data).json()
-            print('--', res1)
-        except Exception as e:
-            print(e) 
-        
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
+                # requests.post(japan_url, data=data)
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
+
         print('-' * 20, '\nthe info is OK\n', '-' * 20)
         print('提交数据OK\n')
         try:
@@ -250,12 +254,12 @@ class Login:
             if self.validation():
                 self.top()
 
-                sleep(2)
-
+                sleep(1)
+                
                 self.confirm()
 
-                sleep(2)
-
+                sleep(1)
+                
                 self.con_two() 
                 print('=========')
             return 1
@@ -264,10 +268,13 @@ class Login:
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_login", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
             sleep(3)
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            res = requests.post(japan_url, data=data).json()
-            print(res)
+            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            # data = {'tid': self.LOG_DATA[7], 'status': '2'}
+            # res = requests.post(japan_url, data=data).json()
+            # print(res)
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        finally:
+            del self.auPipe
          
 
 if __name__ == '__main__':

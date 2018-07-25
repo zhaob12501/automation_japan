@@ -8,6 +8,7 @@ class AutomationPipelines:
     def __init__(self):
         print('in SQL...')
         self.con = POOL.connection()
+        print('connect success, get cursor...')
         self.cur = self.con.cursor()
         print('连接成功...')
 
@@ -83,27 +84,30 @@ class AutomationPipelines:
             # self.cur.execute(sql)
             # self.travel_name = self.cur.fetchall()
             # self.travel_name = tuple([i[0] for i in self.travel_name])
-
-            # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
-             WHERE status = 1 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
-            self.cur.execute(sql)
-            res_1 = self.cur.fetchone()
-
-            if not res_1:
+            for status in [(1, '111'), (2, '111')]:
+                # 查证类别 出入境时间
                 sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
-                 WHERE status = 2 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
+                WHERE status = {status[0]} and submit_status = {status[1]} and travel_name in {self.travel_name} and visa_type not like "%五年%"'
+                self.cur.execute(sql)
+                res_1 = self.cur.fetchone()
+                if res_1:
+                    break  
+            else:
+                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                WHERE (status = 1 or status = 2) and travel_name in {self.travel_name} and visa_type not like "%五年%"'
                 self.cur.execute(sql)
                 res_1 = self.cur.fetchone()
                 if not res_1:
                     print('无需要提交数据')
                     return 0
+                
             self.tid = res_1[5]
             
             if res_1[8] == '222':
-                japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                data = {'tid': self.tid, 'status': '3'}
-                requests.post(japan_url, data=data)
+                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                # data = {'tid': self.tid, 'status': '3'}
+                # requests.post(japan_url, data=data)
+                self.update(tid=self.tid, status='3')
 
             # 旅行社番号
             sql = f'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{res_1[0]}"'
@@ -200,6 +204,64 @@ class AutomationPipelines:
         res = self.cur.fetchone()[0]
         print(res)
         return res
+
+    def update(self, tid='', status='', submit_status='', pdf=''):
+        '''修改数据库接口
+
+        参数:
+            tid
+            status {'2', '3', '7', '8'}
+            submit_status {'211', '221', '222', '111'}
+            pdf '{番号}'
+
+        submit_status = 211 --> {
+            3   --> repatriation_pdf = pdf
+            111 --> repatriation_pdf = pdf, submit_status = submit_status
+        }
+
+        submit_status = 221 or 222 --> {
+            3   --> 跳过
+            211 --> repatriation_pdf = pdf, submit_status = submit_status, status = status
+        }
+
+        submit_status = 111 --> {
+            3   --> repatriation_pdf = '', submit_status = 111, status = 7
+        }
+
+        status = 8 --> {
+            status = status
+        }
+        '''
+        sql = f"SELECT status, submit_status, repatriation_pdf FROM dc_travel_business_list where tid = {tid}"
+        self.cur.execute(sql)
+        res = self.cur.fetchone()
+        try:
+            if res[1] != '3' and str(res[0]) != '6' and str(res[0]) != '7':
+                if status:
+                    upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
+                    self.cur.execute(upSql)
+                if pdf:
+                    upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
+                    self.cur.execute(upSql)
+                if submit_status:
+                    upSql = f"UPDATE dc_travel_business_list SET submit_status='{submit_status}' WHERE tid={tid};"
+                    self.cur.execute(upSql)
+            elif res[1] == '3' and submit_status == '211':
+                if pdf:
+                    upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
+                    self.cur.execute(upSql)
+            elif res[1] == '3' and submit_status == '111':
+                upSql = f"UPDATE dc_travel_business_list SET status='7', repatriation_pdf='', submit_status='111' WHERE tid={tid};"
+                self.cur.execute(upSql)
+            elif (str(res[0]) == '6' or str(res[0]) == '7') and res[1] == '211':
+                upSql = f"UPDATE dc_travel_business_list SET submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
+                self.cur.execute(upSql)
+ 
+            self.con.commit()
+        except:
+            print('数据库执行出错, 进行回滚...')
+            self.con.rollback()
+        
 
     def __del__(self):
         print('\n数据库正在关闭连接')

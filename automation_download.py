@@ -7,9 +7,9 @@ import requests
 import client
 from settings import *
 
-
 class Download:
-    def __init__(self, req, LOG_DATA, DOWN_DATA):
+    def __init__(self, req, LOG_DATA, DOWN_DATA, auto):
+        self.auPipe = auto
         self.req = req
         # requests.utils.add_dict_to_cookiejar(self.req.cookies, client.getCookies())
         self.LOG_DATA = LOG_DATA
@@ -176,10 +176,11 @@ class Download:
         res = requests.post(url, data=data, files=file)
         print(res.json())
         if res.json()['status'] == 1:
-            japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
-            res = requests.post(japan_url, data=data).json()
-            print(res)
+            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+            # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
+            # res = requests.post(japan_url, data=data).json()
+            # print(res) 
+            self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
 
             print('-' * 20, '\nthe info is OK\n', '-' * 20)
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
@@ -189,9 +190,10 @@ class Download:
             # print('Download Step 5 Success, PDF Download Complete')
             # print('Please open the D:\visa path to view the file')
             print('归国报告书下载OK\n')
-        japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        data = {'tid': self.LOG_DATA[7], 'status': '2'}
-        res = requests.post(japan_url, data=data)
+        # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+        # data = {'tid': self.LOG_DATA[7], 'status': '2'}
+        # res = requests.post(japan_url, data=data)
+        self.auPipe.update(tid=self.LOG_DATA[7], status='2')
     
     @property 
     def run(self):
@@ -205,6 +207,8 @@ class Download:
             print('automation_download 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_download", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+        finally:
+            del self.auPipe
         sleep(1)
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import json
+import os
 import random
-import os 
 import re
 
 import requests
@@ -10,8 +10,9 @@ from settings import *
 
 
 class Undo:
-    def __init__(self, req, LOG_DATA):
+    def __init__(self, req, LOG_DATA, auto):
         print('in Undo...')
+        self.auPipe = auto
         self.req = req
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
@@ -77,10 +78,10 @@ class Undo:
                     except:
                         continue
                 else:
-                    japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                    data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
-                    res = requests.post(japan_url, data=data)
-       
+                    # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+                    # data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
+                    # res = requests.post(japan_url, data=data)
+                    self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
 
     # 2、执行撤销操作
     def undo(self):
@@ -97,11 +98,12 @@ class Undo:
             res = self.req.get('https://churenkyosystem.com/member/set_cancel_identity.php', data=data)
         sleep(3)
 
-        japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
-        res = requests.post(japan_url, data=data).json()
-        if res['status'] == 1:
-            print('==========\n撤回请求成功!\n==========')
+        # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
+        # data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
+        # res = requests.post(japan_url, data=data).json()
+        # if res['status'] == 1:
+        self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
+        print('==========\n撤回请求成功!\n==========')
         
         with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
             log = {'撤销': self.LOG_DATA, 'id': self.LOG_DATA[-1], 'time': strftime('%m/%d %H:%M:%S')}
@@ -126,3 +128,5 @@ class Undo:
             print('automation_undo 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
                 f.write(f'["automation_undo", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+        finally:
+            del self.auPipe

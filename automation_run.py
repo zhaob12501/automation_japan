@@ -35,25 +35,25 @@ class Run:
     # 提交数据
     def log_run(self):
         print(self.LOG_DATA)
-        self.log = Login(self.cli.req, self.LOG_DATA)
+        self.log = Login(self.cli.req, self.LOG_DATA, self.auto)
         self.log.run
         self.req_r = self.log.req
 
     # 上传xls文件
     def tra_run(self):
-        self.tra = Transmission(self.cli.req, self.LOG_DATA, self.LOG_INFO)
+        self.tra = Transmission(self.cli.req, self.LOG_DATA, self.LOG_INFO, self.auto)
         self.tra.run
         self.req_r = self.tra.req
 		
     def dow_run(self):
-        self.dow = Download(self.cli.req, self.LOG_DATA, self.DOWN_DATA)
+        self.dow = Download(self.cli.req, self.LOG_DATA, self.DOWN_DATA, self.auto)
         self.dow.run
         self.req_r = self.dow.req
 
     def undo_run(self):
         log_data = self.auto.undo_data
         print(log_data)
-        self.und = Undo(self.cli.req, log_data)
+        self.und = Undo(self.cli.req, log_data, self.auto)
         self.und.run
         self.req_r = self.und.req
 
@@ -87,7 +87,7 @@ class Run:
                     del self.tid
                 except:
                     pass
-                print('刷新成功...等待2分钟...')
+                print('刷新成功...等待半分钟...')
                 print(strftime('%m/%d %H:%M:%S'))
 
                 path = BASE_DIR
@@ -97,7 +97,7 @@ class Run:
                 except:
                     print('.pdf no del')
 
-                sleep(120)
+                sleep(30)
                 continue
 
             up = self.auto.undo_p()
