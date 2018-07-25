@@ -24,7 +24,7 @@ class Transmission:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
-        print(self.info)
+        # print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
 
@@ -103,10 +103,7 @@ class Transmission:
             requests.post(url, data=data).json()
 
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(url)
+            raise AutomationError('登陆失效, 重新登陆...')
         print('The Transmission third step is successful!\n')
         reg = '<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
@@ -151,7 +148,7 @@ class Transmission:
                 # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 # res = requests.post(japan_url, data=data).json()
                 self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
-                print(res, '提交完成！\n========\n', sep='\n')
+                print('提交完成！\n========\n', sep='\n')
  
             else:
                 # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
@@ -179,6 +176,8 @@ class Transmission:
                         f.write(',\n')
                 except:
                     pass
+        except AutomationError:
+            raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_transmission error...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:

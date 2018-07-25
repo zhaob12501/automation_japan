@@ -12,7 +12,6 @@ class Login:
         print('in Login...')
         self.req = REQ
         self.LOG_DATA = LOG_DATA
-        print(len(self.LOG_DATA))
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
 
@@ -31,7 +30,6 @@ class Login:
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
 
-        print('in Login')
         self.auPipe = auto
 
     def validation(self):
@@ -75,14 +73,14 @@ class Login:
         
         res = self.req.post(self.agent_code_url, data=data)
         assert res.url != self.login_url
-        print(res.url)
+        # print(res.url)
         print(res.json())
         if res.url == self.login_url:
             c = client.ClientLogin()
             c.run
             self.req = c.req
             res = self.req.get(self.agent_code_url, data=data)
-            print(res.url)
+            # print(res.url)
         self.res_info = res.json()
         if self.res_info == []:
             # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
@@ -122,7 +120,7 @@ class Login:
         }
         try:
             res = self.req.post(self.confirm_url, data=data)
-            print(res.url, res.status_code, sep='\n')
+            # print(res.url, res.status_code, sep='\n')
         except Exception as e:
             print(e)
   
@@ -149,6 +147,9 @@ class Login:
                 # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 # requests.post(japan_url, data=data)
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
+        else:
+            if res.url == self.login_url:
+                raise AutomationError('登陆失效, 重新登陆...')
 
         print('-' * 20, '\nthe info is OK\n', '-' * 20)
         print('提交数据OK\n')
@@ -245,7 +246,7 @@ class Login:
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '4'
 
-        print(data)
+        # print(data)
         return data
     
     @property
@@ -263,6 +264,8 @@ class Login:
                 self.con_two() 
                 print('=========')
             return 1
+        except AutomationError:
+            raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_login 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
@@ -273,6 +276,7 @@ class Login:
             # res = requests.post(japan_url, data=data).json()
             # print(res)
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            
         finally:
             del self.auPipe
          

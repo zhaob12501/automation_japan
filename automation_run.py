@@ -16,10 +16,17 @@ class Run:
     def __init__(self):
         self.data = 0
         self.cli = ClientLogin()
+        self.control = {
+            '3': self.undo_run,
+            '111': self.log_run,
+            '211': self.tra_run,
+            '221': self.dow_run
+        }
         
     def all_data(self):
         self.LOG_DATA = self.auto.log_data
         self.tid = self.LOG_DATA[7]
+        self.status = self.LOG_DATA[10]
         # print(self.LOG_DATA)
         self.LOG_INFO = self.auto.res_info
         # print(self.LOG_INFO)
@@ -51,42 +58,43 @@ class Run:
         self.req_r = self.dow.req
 
     def undo_run(self):
-        log_data = self.auto.undo_data
-        print(log_data)
-        self.und = Undo(self.cli.req, log_data, self.auto)
+        print(self.LOG_DATA)
+        self.und = Undo(self.cli.req, self.LOG_DATA, self.auto)
         self.und.run
         self.req_r = self.und.req
 
     @property
     def run(self):
+        # ==========
+        # 登陆exe程序
+        # ==========
         if self.cli_run():
             return 
         os.system('taskkill /F /IM chrome.exe')
-        
+        pool = POOL() 
+        # ========
+        # 开始执行
+        # ========
         while True:
-            print('in run...')
+            print('\nin run...')
             try:
-                self.auto = AutomationPipelines()
+                self.auto = AutomationPipelines(pool)
                 self.auto.get_travel_name()
             except:
-                try:
+                if self.auto:
                     del self.auto
-                except:
-                    pass
                 print('数据库连接超时...20秒后重连...')
                 sleep(20)
                 continue
             print('数据库连接完毕...')
-            if self.auto.get_res:
+
+            self.data = self.auto.data()
+            if not self.data:
                 print('没有数据, 准备刷新...')
                 if self.cli.refresh(self.req_r):
                     print('刷新失败...退出...')
                     break
                 del self.auto
-                try:
-                    del self.tid
-                except:
-                    pass
                 print('刷新成功...等待半分钟...')
                 print(strftime('%m/%d %H:%M:%S'))
 
@@ -100,41 +108,27 @@ class Run:
                 sleep(30)
                 continue
 
-            up = self.auto.undo_p()
-            # 判断是否需要撤销
-            print('是否需要撤销:(1/0): ', up)
-            if up:              
-                self.undo_run()
-                sleep(1)
-                continue
-            else:
-                self.data = self.auto.data()
-                sleep(1)
-            
+            # =======
+            # 数据处理
+            # =======
+                   
             # 判断是否需要申请
-            print('是否需要申请:(1/0): ', self.data)
+            print('\n有数据进行提交\n')
 
             # 获取需要申请的人员信息
             self.all_data()
-            self.status = self.auto.status(self.tid)
-            if self.status == '111':
-                self.log_run()
-                
-            sleep(1)
-            if self.status == '211':
-                self.tra_run()
-                
-            sleep(1)
-            if self.status == '221':
-                print('归国报告书下载')
-                self.dow_run()                        
-            sleep(1)
+            
+            self.control[self.status]()
 
-            del self.auto 
+            if self.auto:
+                del self.auto 
+            if self.tid:
+                del self.tid
 
 
 if __name__ == '__main__':
     # sleep(120)
+
     while True:
         print('in automation_run')
         try:

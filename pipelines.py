@@ -1,11 +1,11 @@
 import pymysql
 import requests
 
-from settings import DJ_NAME, POOL
+from settings import DJ_NAME
 
 
 class AutomationPipelines:
-    def __init__(self):
+    def __init__(self, POOL):
         print('in SQL...')
         self.con = POOL.connection()
         print('connect success, get cursor...')
@@ -18,88 +18,41 @@ class AutomationPipelines:
         self.cur.execute(sql)
         self.travel_name = self.cur.fetchall()
         self.travel_name = tuple([i[0] for i in self.travel_name] + [0])
-        print('符合条件的 travel_name:', self.travel_name)
-
-    @property
-    def get_res(self):
-        print('in get_res...')
-        sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf FROM dc_travel_business_list \
-         WHERE (status = 1 or status = 2 or submit_status = 3) and travel_name in {self.travel_name} and visa_type not like "%五年%"'
-        self.cur.execute(sql)
-        if self.cur.fetchall():
-            print('有数据, 准备提交...')
-            return 0
-        print('没有数据...')
-        return 1
-
-    def undo_p(self):
-        try:
-            print('in undo_p')
-            # 查证类别 出入境时间
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques FROM dc_travel_business_list \
-             WHERE submit_status = 3 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
-            self.cur.execute(sql)
-            res_1 = self.cur.fetchone()
-            if not res_1:
-                print('无撤销数据')
-                return 0
-            # print(res_1)
-            # 旅行社番号
-            sql = 'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting \
-             WHERE tid = "{}"'.format(res_1[0])
-            self.cur.execute(sql)
-            res_2 = self.cur.fetchone()
-
-            # 姓名，英文名 人数
-            sql = 'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo \
-             WHERE tvisa_id = "{}"'.format(res_1[5])
-            self.cur.execute(sql)
-            res_3 = self.cur.fetchone()
-            
-            # 查证信息
-            self.undo_data = (
-                res_2[0],
-                res_3[0],
-                '{} {}'.format(res_3[1], res_3[2]),
-                res_3[3] - 1,
-                res_1[1].replace('-', '/').strip(),
-                res_1[2].replace('-', '/').strip(),
-                res_1[3],
-                res_1[5],
-                res_1[6],
-                res_1[7] if not res_1[7] else res_1[7] - 1,
-            )
-            # print(self.undo_data)
-            return 1
-        except Exception as e:
-            print(e, '\n人员信息查询失败！...')
-            return 0
+        # print('符合条件的 travel_name:', self.travel_name)
 
     def data(self):
         try:
             print('in data log_data...')
+            Undo = True
             # print(DJ_NAME)
             # # 查询符合条件的旅行社
             # sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
             # self.cur.execute(sql)
             # self.travel_name = self.cur.fetchall()
             # self.travel_name = tuple([i[0] for i in self.travel_name])
-            for status in [(1, '111'), (2, '111')]:
-                # 查证类别 出入境时间
-                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
-                WHERE status = {status[0]} and submit_status = {status[1]} and travel_name in {self.travel_name} and visa_type not like "%五年%"'
-                self.cur.execute(sql)
-                res_1 = self.cur.fetchone()
-                if res_1:
-                    break  
-            else:
-                sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
-                WHERE (status = 1 or status = 2) and travel_name in {self.travel_name} and visa_type not like "%五年%"'
-                self.cur.execute(sql)
-                res_1 = self.cur.fetchone()
-                if not res_1:
-                    print('无需要提交数据')
-                    return 0
+
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                WHERE submit_status = 3 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
+            self.cur.execute(sql)
+            res_1 = self.cur.fetchone()
+            if not res_1:
+                for status in [1, 2]:
+                    # 查证类别 出入境时间
+                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                    WHERE status = {status} and submit_status = 111 and travel_name in {self.travel_name} and visa_type not like "%五年%"'
+                    self.cur.execute(sql)
+                    res_1 = self.cur.fetchone()
+                    if res_1:
+                        break
+                else:
+                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                    WHERE (status = 1 or status = 2) and travel_name in {self.travel_name} and visa_type not like "%五年%"'
+                    self.cur.execute(sql)
+                    res_1 = self.cur.fetchone()
+                    Undo = False
+                    if not res_1:
+                        print('无需要提交数据')
+                        return 0
                 
             self.tid = res_1[5]
             
@@ -136,9 +89,13 @@ class AutomationPipelines:
                 res_1[5],
                 res_1[6],
                 res_1[7] if not res_1[7] else res_1[7] - 1,
+                res_1[8],
             )
             # print(self.log_data)
-
+            if Undo:
+                self.res_info = ()
+                self.down_data = ()
+                return 1
         except Exception as e:
             print('in log data error')
             print(e, '\n人员信息查询失败！...')
@@ -197,13 +154,6 @@ class AutomationPipelines:
             print(e, '归国报告数据查询失败！...')
 
         return 1
-
-    def status(self, tid):
-        sql = f'SELECT submit_status FROM dc_travel_business_list where tid = {tid}'
-        self.cur.execute(sql)
-        res = self.cur.fetchone()[0]
-        print(res)
-        return res
 
     def update(self, tid='', status='', submit_status='', pdf=''):
         '''修改数据库接口

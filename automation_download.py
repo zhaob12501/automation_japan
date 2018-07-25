@@ -21,7 +21,7 @@ class Download:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
-        print(self.info)
+        # print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'
@@ -42,7 +42,7 @@ class Download:
             res = self.req.post(self.identity_list_url, data=data)
             reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[8])
             self.identity_id = re.findall(reg, res.text)[0]
-            print('The Transmission first step to success!')
+            print('The Download first step to success!')
             print(self.identity_id)
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
@@ -56,7 +56,7 @@ class Download:
                     self.req = c.req
                     res = self.req.get(self.identity_list_url)
                 self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
-                print('The Transmission first step to success!')
+                print('The Download first step to success!')
                 print(self.identity_id)
                     
             except:
@@ -71,7 +71,7 @@ class Download:
                         res = self.req.get(url)
                     try:
                         self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
-                        print('The Transmission first step to success!')
+                        print('The Download first step to success!')
                         self.get_url = url
                         break
                     except:
@@ -158,23 +158,20 @@ class Download:
 
     def down(self):
         url = 'https://churenkyosystem.com/member' + self.down_url
-        print(url)
+        # print(url)
 
         res = self.req.get(url)
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(url)
+            raise AutomationError('登陆失效...')
         with open('{}.pdf'.format(self.SLFH), 'wb') as f:
             f.write(res.content)
         file = {self.SLFH: open('{}.pdf'.format(self.SLFH), 'rb')}
 
         url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdf'
         data = {'tid': f'{self.LOG_DATA[7]}'}
-        print(data)
+        # print(data)
         res = requests.post(url, data=data, files=file)
-        print(res.json())
+        # print(res.json())
         if res.json()['status'] == 1:
             # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
@@ -203,6 +200,8 @@ class Download:
             self.identity_return()
             sleep(1)
             self.down()
+        except AutomationError:
+            raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_download 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:

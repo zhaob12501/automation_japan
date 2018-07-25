@@ -22,4 +22,5 @@ settings.py
 *.jpg
 *.pdf
 *.exe
+.vscode
 user_pwd

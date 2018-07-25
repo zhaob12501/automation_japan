@@ -52,10 +52,7 @@ class Undo:
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
-                    c = client.ClientLogin()
-                    c.run
-                    self.req = c.req
-                    res = self.req.get(self.identity_list_url)
+                    raise AutomationError('登陆失效, 重新登陆...')
                 self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
                 print('The Transmission first step to success!')
                 print(self.identity_id)
@@ -91,11 +88,7 @@ class Undo:
         }
         res = self.req.post('https://churenkyosystem.com/member/set_cancel_identity.php', data=data)
         if res.url == self.login_url:
-            print(res.url)
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get('https://churenkyosystem.com/member/set_cancel_identity.php', data=data)
+            raise AutomationError('登陆失效, 重新登录...')
         sleep(3)
 
         # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
@@ -124,6 +117,8 @@ class Undo:
             self.search_info()
             sleep(1)
             self.undo()
+        except AutomationError:
+            raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_undo 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:

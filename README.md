@@ -82,3 +82,29 @@ cur.close()
 conn.close()
 ```
 
+## 逻辑控制
+
+1. submit_status == 3 --> 执行 undo
+> SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status 
+FROM dc_travel_business_list 
+WHERE submit_status = 3  and travel_name in {self.travel_name} and visa_type not like "%五年%" 
+
+2. status == 1 and submit_status == 111 --> 执行 login
+> SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status 
+FROM dc_travel_business_list 
+WHERE status = 1 and submit_status = '111' and travel_name in {self.travel_name} and visa_type not like "%五年%" 
+
+3. status == 2 and submit_status == 111 --> 执行 login
+> SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status 
+FROM dc_travel_business_list 
+WHERE status = 2 and submit_status = '111' and travel_name in {self.travel_name} and visa_type not like "%五年%" 
+
+4. status == 1 and submit_status == 211|221 --> 执行 trans|down
+> SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status 
+FROM dc_travel_business_list 
+WHERE status = 1 and travel_name in {self.travel_name} and visa_type not like "%五年%" 
+
+5. status == 2 and submit_status == 211|221 --> 执行 trans|down
+> SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status 
+FROM dc_travel_business_list 
+WHERE status = 1 and travel_name in {self.travel_name} and visa_type not like "%五年%" 
