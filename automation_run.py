@@ -79,7 +79,6 @@ class Run:
             print('\nin run...')
             try:
                 self.auto = AutomationPipelines(pool)
-                self.auto.get_travel_name()
             except:
                 if self.auto:
                     del self.auto
@@ -94,7 +93,8 @@ class Run:
                 if self.cli.refresh(self.req_r):
                     print('刷新失败...退出...')
                     break
-                del self.auto
+                if self.auto:
+                    del self.auto 
                 print('刷新成功...等待半分钟...')
                 print(strftime('%m/%d %H:%M:%S'))
 

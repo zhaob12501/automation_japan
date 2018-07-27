@@ -147,7 +147,7 @@ class Transmission:
                 # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
                 # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
                 # res = requests.post(japan_url, data=data).json()
-                self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
+                self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222', pdf=self.FH)
                 print('提交完成！\n========\n', sep='\n')
  
             else:
@@ -155,7 +155,7 @@ class Transmission:
                 # data = {'tid': self.LOG_DATA[7], 'submit_status': '221'}
                 # res = requests.post(japan_url, data=data).json()
                 # print(res)
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221')
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
             return 1
         except:
             return -1

@@ -12,17 +12,14 @@ class AutomationPipelines:
         self.cur = self.con.cursor()
         print('连接成功...')
 
-    def get_travel_name(self):
-        # 符合条件的旅行社
-        sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
-        self.cur.execute(sql)
-        self.travel_name = self.cur.fetchall()
-        self.travel_name = tuple([i[0] for i in self.travel_name] + [0])
-        # print('符合条件的 travel_name:', self.travel_name)
-
     def data(self):
         try:
             print('in data log_data...')
+            # 符合条件的旅行社
+            sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
+            self.cur.execute(sql)
+            self.travel_name = self.cur.fetchall()
+            self.travel_name = tuple([i[0] for i in self.travel_name] + [0])
             Undo = True
             # print(DJ_NAME)
             # # 查询符合条件的旅行社
@@ -50,9 +47,9 @@ class AutomationPipelines:
                     self.cur.execute(sql)
                     res_1 = self.cur.fetchone()
                     Undo = False
-                    if not res_1:
-                        print('无需要提交数据')
-                        return 0
+            if not res_1:
+                print('无需要提交数据')
+                return 0
                 
             self.tid = res_1[5]
             
@@ -185,8 +182,10 @@ class AutomationPipelines:
         sql = f"SELECT status, submit_status, repatriation_pdf FROM dc_travel_business_list where tid = {tid}"
         self.cur.execute(sql)
         res = self.cur.fetchone()
+        if not res:
+            return 0
         try:
-            if res[1] != '3' and str(res[0]) != '6' and str(res[0]) != '7':
+            if res[1] != '3' and res[0] not in [0, 6, 7]:
                 if status:
                     upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
                     self.cur.execute(upSql)
@@ -196,15 +195,18 @@ class AutomationPipelines:
                 if submit_status:
                     upSql = f"UPDATE dc_travel_business_list SET submit_status='{submit_status}' WHERE tid={tid};"
                     self.cur.execute(upSql)
-            elif res[1] == '3' and submit_status == '211':
-                if pdf:
+            elif res[1] == '3':
+                if submit_status == '111':
+                    if res[0] == 1:
+                        upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='', submit_status='111' WHERE tid={tid};"
+                    else:
+                        upSql = f"UPDATE dc_travel_business_list SET status='7', repatriation_pdf='', submit_status='111' WHERE tid={tid};"
+                    self.cur.execute(upSql)
+                elif submit_status in ['221', '222'] and not res[2] and pdf:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
                     self.cur.execute(upSql)
-            elif res[1] == '3' and submit_status == '111':
-                upSql = f"UPDATE dc_travel_business_list SET status='7', repatriation_pdf='', submit_status='111' WHERE tid={tid};"
-                self.cur.execute(upSql)
-            elif (str(res[0]) == '6' or str(res[0]) == '7') and res[1] == '211':
-                upSql = f"UPDATE dc_travel_business_list SET submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
+            elif res[0] in [6, 7] and submit_status == '211':
+                upSql = f"UPDATE dc_travel_business_list SET status = 6, submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
                 self.cur.execute(upSql)
  
             self.con.commit()
