@@ -51,10 +51,7 @@ class Download:
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
-                    c = client.ClientLogin()
-                    c.run
-                    self.req = c.req
-                    res = self.req.get(self.identity_list_url)
+                    raise AutomationError('登陆失效...')
                 self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
                 print('The Download first step to success!')
                 print(self.identity_id)
@@ -65,10 +62,7 @@ class Download:
                     url = self.identity_list_url + ne
                     res = self.req.get(url)
                     if res.url == self.login_url:
-                        c = client.ClientLogin()
-                        c.run
-                        self.req = c.req
-                        res = self.req.get(url)
+                        raise AutomationError('登陆失效...')
                     try:
                         self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
                         print('The Download first step to success!')
@@ -84,10 +78,7 @@ class Download:
 
         res = self.req.get(url)
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(url)
+            raise AutomationError('登陆失效...')
         
         # reg = r'<tr><th>受付番号</th><td colspan="3">(.*?)</td></tr>'
         # self.SLFH = re.findall(reg, res.text)[0]
@@ -134,10 +125,7 @@ class Download:
 
         res = self.req.post(url, data=data)
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(url)
+            raise AutomationError('登陆失效...')
         reg = r'<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
         print('The Download third step is successful')

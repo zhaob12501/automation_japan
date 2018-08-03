@@ -19,7 +19,7 @@ class AutomationPipelines:
             sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
             self.cur.execute(sql)
             self.travel_name = self.cur.fetchall()
-            self.travel_name = tuple([i[0] for i in self.travel_name] + [0])
+            self.travel_name = tuple([i[0] for i in self.travel_name] + [0, 0])
             Undo = True
             # print(DJ_NAME)
             # # 查询符合条件的旅行社

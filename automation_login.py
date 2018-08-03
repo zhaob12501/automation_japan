@@ -50,12 +50,7 @@ class Login:
         print('in Login top')
         res = self.req.get(self.top_url)
         if res.url == self.login_url:
-            print('登陆问题')
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(self.top_url)
-            print(res.url)
+            raise AutomationError('登陆失效...')
         print('in Login top 2')
         res = self.req.get(self.add_url)
         assert res.url != self.login_url
@@ -76,23 +71,15 @@ class Login:
         # print(res.url)
         print(res.json())
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(self.agent_code_url, data=data)
-            # print(res.url)
-        self.res_info = res.json()
-        if self.res_info == []:
-            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            # data = {'tid': self.LOG_DATA[7], 'status': '8'}
-            # res = requests.post(japan_url, data=data).json()
-            # print(res)
-            self.auPipe.update(tid=self.LOG_DATA[7], status='8')
-            return -1
-        print('指定番号检索完成(指定番号の検索完了)\n番号为(番号を)：\n\t{0}\nID为(IDを)：\n\t{1}\n'
-              '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
-              ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
-                        self.res_info['COMPANY_NAME'], self.res_info['DIPLOMAT_NAME']))
+            raise AutomationError('登陆失效...')
+        try:
+            self.res_info = res.json()
+            print('指定番号检索完成(指定番号の検索完了)\n番号为(番号を)：\n\t{0}\nID为(IDを)：\n\t{1}\n'
+                '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
+                ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
+                            self.res_info['COMPANY_NAME'], self.res_info['DIPLOMAT_NAME']))
+        except:
+            raise AutomationError('mash')
 
     
     # 第四步 填写信息并确认
@@ -102,10 +89,7 @@ class Login:
         res = self.req.post(self.confirm_url, data=files)
         assert res.url != self.login_url
         if res.url == self.login_url:
-            c = client.ClientLogin()
-            c.run
-            self.req = c.req
-            res = self.req.get(self.confirm_url, data=files)
+            raise AutomationError('登陆失效...')
         reg = r'<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
         self._PAGE_KEY_2 = re.findall(reg, res.text)[0]
         # print(self._PAGE_KEY_2)
@@ -264,8 +248,11 @@ class Login:
                 self.con_two() 
                 print('=========')
             return 1
-        except AutomationError:
-            raise AutomationError('登陆失效, 重新登陆...')
+        except AutomationError as ae:
+            if ae.errorinfo == 'mash':
+                self.auPipe.update(tid=self.LOG_DATA[7], status='8')
+            else:
+                raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_login 出现错误...')
             with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
@@ -276,7 +263,6 @@ class Login:
             # res = requests.post(japan_url, data=data).json()
             # print(res)
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
-            
         finally:
             del self.auPipe
          

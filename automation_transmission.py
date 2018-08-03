@@ -55,10 +55,7 @@ class Transmission:
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
-                    c = client.ClientLogin()
-                    c.run
-                    self.req = c.req
-                    res = self.req.get(self.identity_list_url)
+                    raise AutomationError('登陆失效...')
                 self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
                 print('The Transmission first step to success!')
                 print(self.identity_id)
@@ -69,10 +66,7 @@ class Transmission:
                     url = self.identity_list_url + ne
                     res = self.req.get(url)
                     if res.url == self.login_url:
-                        c = client.ClientLogin()
-                        c.run
-                        self.req = c.req
-                        res = self.req.get(url)
+                        raise AutomationError('登陆失效...')
                     try:
                         self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
                         print('The Transmission first step to success!')
