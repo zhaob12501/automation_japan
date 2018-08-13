@@ -18,7 +18,6 @@ def cre_xls(LGO_INFO):
 	        ]
 
 	data = data + LGO_INFO
-	print(data)
 	for i in range(len(data)):
 	    for j in range(len(data[i])):
 	        worksheet.write(i, j, label = data[i][j])

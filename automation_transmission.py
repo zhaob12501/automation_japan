@@ -24,7 +24,6 @@ class Transmission:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
-        # print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
 
@@ -50,7 +49,6 @@ class Transmission:
             print(self.identity_id)
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
-            # def search_info(self):
             print('检索信息-无番号查询')
             try:
                 res = self.req.get(self.identity_list_url)
@@ -129,8 +127,7 @@ class Transmission:
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
                 errorMsg = res.text.split('<p class="errorMsg">')[1].split('</p>')[0]
                 print(errorMsg)
-                with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                    f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{errorMsg}"],\n')
+                ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "errorMsg", errorMsg)
             return -1 
         try:
             
@@ -148,7 +145,6 @@ class Transmission:
                 # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
                 # data = {'tid': self.LOG_DATA[7], 'submit_status': '221'}
                 # res = requests.post(japan_url, data=data).json()
-                # print(res)
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
             return 1
         except:
@@ -174,8 +170,7 @@ class Transmission:
             raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_transmission error...')
-            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["automation_transmission", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_transmission", e)
             # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             # data = {'tid': self.LOG_DATA[7], 'status': '2'}
             # res = requests.post(japan_url, data=data).json()
@@ -183,7 +178,3 @@ class Transmission:
         finally:
             del self.auPipe
         sleep(1)
-        
-
-if __name__ == '__main__':
-    pass

@@ -18,9 +18,7 @@ def getCookies():
     cursor.execute('select host_key,name,encrypted_value from cookies where host_key like "churenkyosystem.com"')
     cookies={}  
     for result in cursor.fetchall():  
-        # print(result)    
         value = win32crypt.CryptUnprotectData(result[2], None, None, None, 0)[1]
-        # print(result[2], value)  
         if value != b'""':  
             cookies[result[1]] = value.decode('utf8')
         elif not value:  
@@ -42,11 +40,6 @@ def open_client():
     sleep(2)
     m.click(COORDINATES_2[0],COORDINATES_2[1])
     sleep(60)
-    # try:
-    #     os.system('taskkill /F /IM chrome.exe')
-    # except:
-    #     pass
-
 
 
 class ClientLogin:
@@ -61,7 +54,6 @@ class ClientLogin:
             co.pop('PHPSESSID')
         except:
             pass
-        print(co)
         requests.utils.add_dict_to_cookiejar(self.req.cookies, co)
 
         self.req.headers = {
@@ -85,30 +77,23 @@ class ClientLogin:
             'PASSWORD': PASSWORD,
             'SUBMIT_LOGIN_x': 'ログイン'
          }
-        # print(from_data)
         print('正在传输,请耐心等待...')
         sleep(5)
         res = self.req.post(self.login_url, data=from_data)
-        print(res.url)
         if res.url == self.top_url:
-            # print('登录成功!...\n')
             return 1
         else:
-            # print('登录失败！...请重试！...')
             return 0
 
     def refresh(self, req):
         res = req.get(self.top_url)
-        print(res.url)
         if res.url == self.login_url:
             for _ in range(5):
                 if self.login():
                     break
             else:
                 return 1
-        return 0
-                
-            
+        return 0  
         
     @property
     def run(self):
@@ -119,10 +104,3 @@ class ClientLogin:
             return 0
         else:
             return 1
-
-
-if __name__ == '__main__':
-    print(getCookies())
-    sleep(5)
-    open_client()
-    input('---')

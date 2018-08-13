@@ -38,9 +38,6 @@ class Login:
         if self.info in res.text:
             invalid = res.text.split(self.info)[0].split('<a href="identity_info.php?IDENTITY_ID')[-1]
             if '発行済' in invalid:
-                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                # data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-                # requests.post(japan_url, data=data)
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
                 return 0
         return 1
@@ -57,8 +54,6 @@ class Login:
         print('in Login top 3')
         reg = r'<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
-        # print(self._PAGE_KEY)
-        # print(res.text)
 
         print('in Login top data')
         # 指定番号
@@ -68,7 +63,6 @@ class Login:
         
         res = self.req.post(self.agent_code_url, data=data)
         assert res.url != self.login_url
-        # print(res.url)
         print(res.json())
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
@@ -79,7 +73,7 @@ class Login:
                 ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
                             self.res_info['COMPANY_NAME'], self.res_info['DIPLOMAT_NAME']))
         except:
-            raise AutomationError('mash')
+            raise AutomationError('未检测到番号')
 
     
     # 第四步 填写信息并确认
@@ -92,7 +86,6 @@ class Login:
             raise AutomationError('登陆失效...')
         reg = r'<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
         self._PAGE_KEY_2 = re.findall(reg, res.text)[0]
-        # print(self._PAGE_KEY_2)
 
     # 第五步 提交
     def con_two(self):
@@ -104,32 +97,21 @@ class Login:
         }
         try:
             res = self.req.post(self.confirm_url, data=data)
-            # print(res.url, res.status_code, sep='\n')
         except Exception as e:
             print(e)
   
         if res.url == 'https://churenkyosystem.com/member/identity_edit.php?mode=add' and res.status_code == 200:
+            if '完了画面' not in res.text:
+                raise AutomationError("未提交成功")
             try:
                 reg = r'受付番号(.*?)<'
                 self.FH = re.findall(reg, res.text)[0][1:].strip()
                 print(f'\n\n===={self.FH}====\n\n')
-                # url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdftext'
-                # data = {'tid': self.LOG_DATA[7], 'text': self.FH}
-                # res1 = requests.post(url, data=data).json()
-                # print('--', res1)
             except Exception as e:
                 print(e) 
             if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
-                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                # data = {'tid': self.LOG_DATA[7], 'submit_status': '211'}
-                # requests.post(japan_url, data=data).json()
-                # sleep(1)
-                
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
             else:
-                # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
-                # requests.post(japan_url, data=data)
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
         else:
             if res.url == self.login_url:
@@ -230,7 +212,6 @@ class Login:
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '4'
 
-        # print(data)
         return data
     
     @property
@@ -249,23 +230,20 @@ class Login:
                 print('=========')
             return 1
         except AutomationError as ae:
-            if ae.errorinfo == 'mash':
+            if ae.errorinfo == '未检测到番号':
                 self.auPipe.update(tid=self.LOG_DATA[7], status='8')
+            elif ae.errorinfo == "未提交成功":
+                self.auPipe.update(tid=self.LOG_DATA[7], status='9')
             else:
                 raise AutomationError('登陆失效, 重新登陆...')
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", ae.errorinfo)
         except Exception as e:
             print('automation_login 出现错误...')
-            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["automation_login", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
             sleep(3)
             # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
             # data = {'tid': self.LOG_DATA[7], 'status': '2'}
             # res = requests.post(japan_url, data=data).json()
-            # print(res)
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
         finally:
             del self.auPipe
-         
-
-if __name__ == '__main__':
-    pass

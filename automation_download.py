@@ -11,7 +11,6 @@ class Download:
     def __init__(self, req, LOG_DATA, DOWN_DATA, auto):
         self.auPipe = auto
         self.req = req
-        # requests.utils.add_dict_to_cookiejar(self.req.cookies, client.getCookies())
         self.LOG_DATA = LOG_DATA
         self.DOWN_DATA = DOWN_DATA
         self.SLFH = self.LOG_DATA[8]
@@ -21,7 +20,6 @@ class Download:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
-        # print(self.info)
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'
@@ -46,7 +44,6 @@ class Download:
             print(self.identity_id)
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
-            # def search_info(self):
             print('检索信息-无番号查询')
             try:
                 res = self.req.get(self.identity_list_url)
@@ -80,8 +77,6 @@ class Download:
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
         
-        # reg = r'<tr><th>受付番号</th><td colspan="3">(.*?)</td></tr>'
-        # self.SLFH = re.findall(reg, res.text)[0]
         print('The Download second step is successful')
         reg = '<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
@@ -146,7 +141,6 @@ class Download:
 
     def down(self):
         url = 'https://churenkyosystem.com/member' + self.down_url
-        # print(url)
 
         res = self.req.get(url)
         if res.url == self.login_url:
@@ -157,14 +151,8 @@ class Download:
 
         url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdf'
         data = {'tid': f'{self.LOG_DATA[7]}'}
-        # print(data)
         res = requests.post(url, data=data, files=file)
-        # print(res.json())
         if res.json()['status'] == 1:
-            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            # data = {'tid': self.LOG_DATA[7], 'status': '3', 'submit_status': '222'}
-            # res = requests.post(japan_url, data=data).json()
-            # print(res) 
             self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
 
             print('-' * 20, '\nthe info is OK\n', '-' * 20)
@@ -172,12 +160,7 @@ class Download:
                 log = {'归国': self.DOWN_DATA, 'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
-            # print('Download Step 5 Success, PDF Download Complete')
-            # print('Please open the D:\visa path to view the file')
             print('归国报告书下载OK\n')
-        # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        # data = {'tid': self.LOG_DATA[7], 'status': '2'}
-        # res = requests.post(japan_url, data=data)
         self.auPipe.update(tid=self.LOG_DATA[7], status='2')
     
     @property 
@@ -192,11 +175,8 @@ class Download:
             raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_download 出现错误...')
-            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["automation_download", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_download", e)
         finally:
             del self.auPipe
         sleep(1)
 
-if __name__ == '__main__':
-    pass

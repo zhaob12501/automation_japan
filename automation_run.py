@@ -27,11 +27,8 @@ class Run:
         self.LOG_DATA = self.auto.log_data
         self.tid = self.LOG_DATA[7]
         self.status = self.LOG_DATA[10]
-        # print(self.LOG_DATA)
         self.LOG_INFO = self.auto.res_info
-        # print(self.LOG_INFO)
         self.DOWN_DATA = self.auto.down_data
-        # print(self.DOWN_DATA)
     
     # 登录--clientLogin    
     def cli_run(self):
@@ -82,8 +79,7 @@ class Run:
             except:
                 if self.auto:
                     del self.auto
-                print('数据库连接超时...20秒后重连...')
-                sleep(20)
+                print('数据库连接超时...重连...')
                 continue
             print('数据库连接完毕...')
 
@@ -95,7 +91,7 @@ class Run:
                     break
                 if self.auto:
                     del self.auto 
-                print('刷新成功...等待半分钟...')
+                print('刷新成功...等待...')
                 print(strftime('%m/%d %H:%M:%S'))
 
                 path = BASE_DIR
@@ -105,7 +101,7 @@ class Run:
                 except:
                     print('.pdf no del')
 
-                sleep(30)
+                sleep(5)
                 continue
 
             # =======
@@ -143,10 +139,8 @@ if __name__ == '__main__':
             
         except Exception as e:
             print('automation_run 出现错误...')
-            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["automation_run", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            ERRINFO(r.err, None, "automation_run", e)
         finally:
-            print('等待1分钟重启...')
+            print('系统重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
             os.system('taskkill /f /im chrome.exe')
-            sleep(60)

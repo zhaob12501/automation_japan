@@ -11,7 +11,7 @@ from settings import *
 
 class Undo:
     def __init__(self, req, LOG_DATA, auto):
-        print('in Undo...')
+        print('启动撤回模块...')
         self.auPipe = auto
         self.req = req
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
@@ -43,38 +43,32 @@ class Undo:
             res = self.req.post(self.identity_list_url, data=data)
             reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[8])
             self.identity_id = re.findall(reg, res.text)[0]
-            print('The Transmission first step to success!')
-            print(self.identity_id)
+            print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
-            # def search_info(self):
             print('检索信息-无番号查询')
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
                     raise AutomationError('登陆失效, 重新登陆...')
                 self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
-                print('The Transmission first step to success!')
-                print(self.identity_id)
+                print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
                     
             except:
                 for i in range(1, 31):
-                    ne = '?p={}&s=1&d=2'.format(i)
+                    ne = f'?p={i}&s=1&d=2'
                     url = self.identity_list_url + ne
                     res = self.req.get(url)
                     if res.url == self.login_url:
                         raise AutomationError('登陆失效...')
                     try:
                         self.identity_id = res.text.split(self.info, 1)[1].split('<tr class="', 1)[1].split('"', 1)[0][-7:]
-                        print('The Transmission first step to success!')
+                        print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
                         self.get_url = url
                         break
                     except:
                         continue
                 else:
-                    # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-                    # data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
-                    # res = requests.post(japan_url, data=data)
                     self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
 
     # 2、执行撤销操作
@@ -88,10 +82,6 @@ class Undo:
             raise AutomationError('登陆失效, 重新登录...')
         sleep(3)
 
-        # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-        # data = {'tid': self.LOG_DATA[7], 'submit_status': '111'}
-        # res = requests.post(japan_url, data=data).json()
-        # if res['status'] == 1:
         self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
         print('==========\n撤回请求成功!\n==========')
         
@@ -115,7 +105,6 @@ class Undo:
             raise AutomationError('登陆失效, 重新登陆...')
         except Exception as e:
             print('automation_undo 出现错误...')
-            with open(BASE_DIR + '\\visa_log/error.json', 'a') as f:
-                f.write(f'["automation_undo", "{strftime("%Y-%m-%d %H:%M:%S")}", "{e}"],\n')
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_undo", e)
         finally:
             del self.auPipe
