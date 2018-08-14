@@ -142,25 +142,37 @@ class Login:
             "ARRIVAL_DATE":self. LOG_DATA[4],
             "DEPARTURE_DATE": self.LOG_DATA[5],
 
-            "VISA_VISIT_TYPE": "0",
+            
             
             "_PAGE_KEY": self._PAGE_KEY,
             "BTN_CHECK_x": "確 認"    
         }
         print('-------------------------')
         info = {
-        '单次签证': 1,
-        '冲绳单次签证': 1,
-        '团体查证': 2,
-        '冲绳三年签证': 3,
-        '东北六县三年（青森）': 4,
-        '东北六县三年（岩手）': 5,
-        '东北六县三年（宫城）': 6,
-        '东三县1三年宫城签证': 6,
-        '东北六县三年（秋田）': 7,
-        '东北六县三年（山形）': 8,
-        '东北六县三年（福岛）': 9,
-        '三年多次签证': 10,
+            '单次签证': 1,
+            '冲绳单次签证': 1,
+            '东北1单次': 1,
+            '东三县1单次': 1,
+            '东三县2单次': 1,
+            '冲绳东北六县单次': 1,
+            '单次30': 1,
+            '团体查证': 2,
+            '冲绳三年签证': 3,
+            '东北六县三年（青森）': 4,
+            '东北六县三年（岩手）': 5,
+            '东北六县三年（宫城）': 6,
+            '东北六县三年（秋田）': 7,
+            '东北六县三年（山形）': 8,
+            '东北六县三年（福岛）': 9,
+            '三年多次签证': 10,
+            '冲绳东北六县多次': 10,
+            '东三县2三年': 11,
+            '东北2A三年': 11,
+            '东北1三年': 12,
+            '东三县1三年': 12,
+            '东北2B三年': 13,
+            '东北2C三年': 14,
+            '东北2D三年': 14,
         }
 
         add_info = info[self.LOG_DATA[6]]
@@ -169,48 +181,115 @@ class Login:
             data["VISA_TYPE"] = '2'
             data["VISA_TYPE_1"] = '2'
             data["VISA_TYPE_2"] = '4'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 2:
             data["VISA_TYPE"] = '1'
             data["VISA_TYPE_1"] = '1'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 3:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_47"] = '47'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 4:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_2"] = '2'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 5:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_3"] = '3'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 6:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_4"] = '4'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 7:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_4"] = '5'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 8:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_6"] = '6'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 9:
             data["VISA_TYPE"] = '3'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '3'
             data["VISA_STAY_PREF_7"] = '7'
+            data["VISA_VISIT_TYPE"] = "0"
         elif add_info is 10:
             data["VISA_TYPE"] = '4'
             data["VISA_TYPE_1"] = 'N'
             data["VISA_TYPE_2"] = '4'
+            data["VISA_VISIT_TYPE"] = "0"
+        elif add_info is 11:
+            data["VISA_TYPE"] = '3'
+            data["VISA_TYPE_1"] = 'N'
+            data["VISA_TYPE_2"] = '3'
+            data["VISA_STAY_PREF_2"] = '2'
+            data["VISA_STAY_PREF_4"] = '5'
+            data["VISA_STAY_PREF_6"] = '6'
+            data["VISA_VISIT_TYPE"] = "0"
+        elif add_info is 12:
+            data["VISA_TYPE"] = '3'
+            data["VISA_TYPE_1"] = 'N'
+            data["VISA_TYPE_2"] = '3'
+            data["VISA_STAY_PREF_4"] = '4'
+            data["VISA_STAY_PREF_3"] = '3'
+            data["VISA_STAY_PREF_7"] = '7'
+            data["VISA_VISIT_TYPE"] = '1'
+            data["VISA_VISIT_PREF_3"] = '3'
+            data["VISA_VISIT_PREF_4"] = '4'
+            data["VISA_VISIT_PREF_7"] = '7'
+        elif add_info is 13:
+            data["VISA_TYPE"] = '3'
+            data["VISA_TYPE_1"] = 'N'
+            data["VISA_TYPE_2"] = '3'
+            data["VISA_STAY_PREF_2"] = '2'
+            data["VISA_STAY_PREF_3"] = '3'
+            data["VISA_STAY_PREF_4"] = '4'
+            data["VISA_STAY_PREF_4"] = '5'
+            data["VISA_STAY_PREF_6"] = '6'
+            data["VISA_STAY_PREF_7"] = '7'
+            data["VISA_VISIT_TYPE"] = '1'
+            data["VISA_VISIT_PREF_3"] = '3'
+            data["VISA_VISIT_PREF_4"] = '4'
+            data["VISA_VISIT_PREF_7"] = '7'
+        elif add_info is 14:
+            data["VISA_TYPE"] = '3'
+            data["VISA_TYPE_1"] = 'N'
+            data["VISA_TYPE_2"] = '3'
+            data["VISA_STAY_PREF_47"] = '47'
+            data["VISA_STAY_PREF_2"] = '2'
+            data["VISA_STAY_PREF_4"] = '5'
+            data["VISA_STAY_PREF_6"] = '6'
+            data["VISA_VISIT_TYPE"] = '0'
+        elif add_info is 15:
+            data["VISA_TYPE"] = '3'
+            data["VISA_TYPE_1"] = 'N'
+            data["VISA_TYPE_2"] = '3'
+            data["VISA_STAY_PREF_47"] = '47'
+            data["VISA_STAY_PREF_2"] = '2'
+            data["VISA_STAY_PREF_3"] = '3'
+            data["VISA_STAY_PREF_4"] = '4'
+            data["VISA_STAY_PREF_4"] = '5'
+            data["VISA_STAY_PREF_6"] = '6'
+            data["VISA_STAY_PREF_7"] = '7'
+            data["VISA_VISIT_TYPE"] = '1'
+            data["VISA_VISIT_PREF_3"] = '3'
+            data["VISA_VISIT_PREF_4"] = '4'
+            data["VISA_VISIT_PREF_7"] = '7'
 
         return data
     
@@ -241,9 +320,6 @@ class Login:
             print('automation_login 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
             sleep(3)
-            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            # data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            # res = requests.post(japan_url, data=data).json()
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
         finally:
             del self.auPipe
