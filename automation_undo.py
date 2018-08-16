@@ -14,6 +14,7 @@ class Undo:
         print('启动撤回模块...')
         self.auPipe = auto
         self.req = req
+        self.FH = LOG_DATA[8] if len(LOG_DATA[8]) == 9 else LOG_DATA[8].split(".pdf")[0][-9:]
         # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
         # self.req.verify = False
         self.LOG_DATA = LOG_DATA
@@ -31,17 +32,17 @@ class Undo:
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
         print('进入搜索信息搜索列表，并搜索指定ID')
-        print(self.LOG_DATA[8])
-        if self.LOG_DATA[8]:
+        print(self.FH)
+        if self.FH:
             print('检索信息-有番号查询')
             data = {
-                'CODE': self.LOG_DATA[8],
+                'CODE': self.FH,
                 'PAGE_VIEW_NUMBER': '0',
                 'BTN_SEARCH_x': '検 索',
             }
 
             res = self.req.post(self.identity_list_url, data=data)
-            reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.LOG_DATA[8])
+            reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(self.FH)
             self.identity_id = re.findall(reg, res.text)[0]
             print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
         else:
