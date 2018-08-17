@@ -166,15 +166,19 @@ class Transmission:
                         f.write(',\n')
                 except:
                     pass
+        except AttributeError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        except IndexError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError("列表超出范围", "automation_transmission")
         except AutomationError:
-            raise AutomationError('登陆失效, 重新登陆...')
+            raise AutomationError('登陆失效, 重新登陆...', "automation_transmission")
         except Exception as e:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_transmission error...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_transmission", e)
-            # japan_url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanVisaStatus'
-            # data = {'tid': self.LOG_DATA[7], 'status': '2'}
-            # res = requests.post(japan_url, data=data).json()
-            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
         finally:
-            del self.auPipe
-        sleep(1)
+            try:
+                del self.auPipe
+            except:
+                pass

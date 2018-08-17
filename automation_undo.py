@@ -102,8 +102,13 @@ class Undo:
             self.search_info()
             sleep(1)
             self.undo()
+        except AttributeError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        except IndexError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError("列表超出范围", "automation_undo")
         except AutomationError:
-            raise AutomationError('登陆失效, 重新登陆...')
+            raise AutomationError('登陆失效, 重新登陆...', "automation_undo")
         except Exception as e:
             print('automation_undo 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_undo", e)

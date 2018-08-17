@@ -136,7 +136,6 @@ if __name__ == '__main__':
                 sleep(10)
             r = Run()
             r.run
-            
         except Exception as e:
             print('automation_run 出现错误...')
             ERRINFO(file="automation_run", e=e)

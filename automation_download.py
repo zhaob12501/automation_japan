@@ -171,12 +171,20 @@ class Download:
             self.identity_return()
             sleep(1)
             self.down()
+        except AttributeError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        except IndexError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError("列表超出范围", "automation_download")
         except AutomationError:
-            raise AutomationError('登陆失效, 重新登陆...')
+            raise AutomationError('登陆失效, 重新登陆...', "automation_download")
         except Exception as e:
             print('automation_download 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_download", e)
         finally:
-            del self.auPipe
+            try:
+                del self.auPipe
+            except:
+                pass
         sleep(1)
 

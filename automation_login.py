@@ -308,6 +308,11 @@ class Login:
                 self.con_two() 
                 print('=========')
             return 1
+        except AttributeError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        except IndexError:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError("列表超出范围", "automation_login")
         except AutomationError as ae:
             if ae.errorinfo == '未检测到番号':
                 self.auPipe.update(tid=self.LOG_DATA[7], status='8')
@@ -317,9 +322,12 @@ class Login:
                 raise AutomationError('登陆失效, 重新登陆...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", ae.errorinfo)
         except Exception as e:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_login 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
             sleep(3)
-            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
         finally:
-            del self.auPipe
+            try:
+                del self.auPipe
+            except:
+                pass
