@@ -15,13 +15,12 @@ class Undo:
         self.auPipe = auto
         self.req = req
         self.FH = LOG_DATA[8] if len(LOG_DATA[8]) == 9 else LOG_DATA[8].split(".pdf")[0][-9:]
-        # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
-        # self.req.verify = False
+
         self.LOG_DATA = LOG_DATA
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'
         self.identity_name_url = 'https://churenkyosystem.com/member/identity_name_list.php?IDENTITY_ID={}'
         self.i_nup_e_url = 'https://churenkyosystem.com/member/identity_nameupload_edit.php?IDENTITY_ID={}'
-        # self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+        
         if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:

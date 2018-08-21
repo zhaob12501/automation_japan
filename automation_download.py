@@ -14,8 +14,7 @@ class Download:
         self.LOG_DATA = LOG_DATA
         self.DOWN_DATA = DOWN_DATA
         self.SLFH = self.LOG_DATA[8]
-        # self.req.proxies = {'http': '127.0.0.1:8888', 'https': '127.0.0.1:8888'}
-        # self.req.verify = False
+        
         if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
             self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
