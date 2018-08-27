@@ -1,7 +1,7 @@
 import pymysql
 import requests
 
-from settings import DJ_NAME
+from settings import DJ_NAME, time
 
 
 class AutomationPipelines:
@@ -165,8 +165,8 @@ class AutomationPipelines:
                 3   --> repatriation_pdf = '', submit_status = 111, status = 7
             }
 
-            status = 8 --> {
-                status = status
+            status = 8, 9, 2, 3 --> {
+                status = status 『3 --> update_time = int(time())』
             }
         '''
         sql = f"SELECT status, submit_status, repatriation_pdf FROM dc_travel_business_list where tid = {tid}"
@@ -177,7 +177,11 @@ class AutomationPipelines:
         try:
             if res[1] != '3' and res[0] not in [0, 6, 7]:
                 if status:
-                    upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
+                    if str(status) != '3':
+                        upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
+                    else:
+                        upSql = f"UPDATE dc_travel_business_list SET status='{status}', apdate_time={int(time())} WHERE tid={tid};"
+
                     self.cur.execute(upSql)
                 if pdf:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
@@ -196,7 +200,7 @@ class AutomationPipelines:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
                     self.cur.execute(upSql)
             elif res[0] in [6, 7] and submit_status == '211':
-                upSql = f"UPDATE dc_travel_business_list SET status = 6, submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
+                upSql = f"UPDATE dc_travel_business_list SET status='6', submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
                 self.cur.execute(upSql)
  
             self.con.commit()
@@ -211,4 +215,3 @@ class AutomationPipelines:
         if self.con:
             self.con.close()
         print('数据库已关闭连接\n')
-
