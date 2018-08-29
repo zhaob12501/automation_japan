@@ -180,7 +180,7 @@ class AutomationPipelines:
                     if str(status) != '3':
                         upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
                     else:
-                        upSql = f"UPDATE dc_travel_business_list SET status='{status}', apdate_time={int(time())} WHERE tid={tid};"
+                        upSql = f"UPDATE dc_travel_business_list SET status='{status}', update_time={int(time())} WHERE tid={tid};"
 
                     self.cur.execute(upSql)
                 if pdf:
