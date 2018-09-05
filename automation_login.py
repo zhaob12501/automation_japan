@@ -5,7 +5,8 @@ import re
 import requests
 
 import client
-from settings import *
+from settings import DAY, sleep, strftime, AutomationError, LOG_DIR, ERRINFO
+
 
 class Login:
     def __init__(self, REQ, LOG_DATA, auto):
@@ -24,17 +25,21 @@ class Login:
         # 确认信息url
         self.confirm_url = 'https://churenkyosystem.com/member/identity_edit.php?mode=add'
         if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
-            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
+            self.info = '{0}（{1}）：{2}名'.format(
+                self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[3])
         else:
-            self.info = '{0}（{1}）：{2}名'.format(self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
+            self.info = '{0}（{1}）：{2}名'.format(
+                self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
 
         self.auPipe = auto
 
     def validation(self):
         print('in Login validation')
-        res = self.req.get('https://churenkyosystem.com/member/identity_list.php')
+        res = self.req.get(
+            'https://churenkyosystem.com/member/identity_list.php')
         if self.info in res.text:
-            invalid = res.text.split(self.info)[0].split('<a href="identity_info.php?IDENTITY_ID')[-1]
+            invalid = res.text.split(self.info)[0].split(
+                '<a href="identity_info.php?IDENTITY_ID')[-1]
             if '発行済' in invalid:
                 self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
                 return 0
@@ -57,8 +62,8 @@ class Login:
         # 指定番号
         data = {
             'CHINA_AGENT_CODE': self.LOG_DATA[0]
-            }
-        
+        }
+
         res = self.req.post(self.agent_code_url, data=data)
         assert res.url != self.login_url
         print(res.json())
@@ -67,14 +72,14 @@ class Login:
         try:
             self.res_info = res.json()
             print('指定番号检索完成(指定番号の検索完了)\n番号为(番号を)：\n\t{0}\nID为(IDを)：\n\t{1}\n'
-                '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
-                ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
+                  '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
+                  ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
                             self.res_info['COMPANY_NAME'], self.res_info['DIPLOMAT_NAME']))
         except:
             raise AutomationError('未检测到番号')
 
-    
     # 第四步 填写信息并确认
+
     def confirm(self):
         print('in login confirm')
         files = self.files_data()
@@ -97,7 +102,7 @@ class Login:
             res = self.req.post(self.confirm_url, data=data)
         except Exception as e:
             print(e)
-  
+
         if res.url == 'https://churenkyosystem.com/member/identity_edit.php?mode=add' and res.status_code == 200:
             if '完了画面' not in res.text:
                 raise AutomationError("未提交成功")
@@ -106,11 +111,13 @@ class Login:
                 self.FH = re.findall(reg, res.text)[0][1:].strip()
                 print(f'\n\n===={self.FH}====\n\n')
             except Exception as e:
-                print(e) 
+                print(e)
             if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
+                self.auPipe.update(
+                    tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
             else:
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
+                self.auPipe.update(
+                    tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
         else:
             if res.url == self.login_url:
                 raise AutomationError('登陆失效, 重新登陆...')
@@ -119,7 +126,8 @@ class Login:
         print('提交数据OK\n')
         try:
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
-                log = {'提交': self.LOG_DATA, 'id': self.FH, 'time': strftime('%m/%d %H:%M:%S')}
+                log = {'提交': self.LOG_DATA, 'id': self.FH,
+                       'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
         except:
@@ -137,13 +145,13 @@ class Login:
             "APPLICANT_NAME": self.LOG_DATA[1],
             "APPLICANT_PINYIN": self.LOG_DATA[2],
             "NUMBER_OF_TOURISTS": self.LOG_DATA[3],
-            "ARRIVAL_DATE":self. LOG_DATA[4],
+            "ARRIVAL_DATE": self. LOG_DATA[4],
             "DEPARTURE_DATE": self.LOG_DATA[5],
 
-            
-            
+
+
             "_PAGE_KEY": self._PAGE_KEY,
-            "BTN_CHECK_x": "確 認"    
+            "BTN_CHECK_x": "確 認"
         }
         print('-------------------------')
         info = {
@@ -298,7 +306,7 @@ class Login:
             data["VISA_VISIT_PREF_7"] = '7'
 
         return data
-    
+
     @property
     def run(self):
         try:
@@ -306,12 +314,12 @@ class Login:
                 self.top()
 
                 sleep(1)
-                
+
                 self.confirm()
 
                 sleep(1)
-                
-                self.con_two() 
+
+                self.con_two()
                 print('=========')
             return 1
         except AttributeError:
@@ -326,7 +334,8 @@ class Login:
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
             else:
                 raise AutomationError('登陆失效, 重新登陆...')
-            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", ae.errorinfo)
+            ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
+                    "automation_login", ae.errorinfo)
         except Exception as e:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_login 出现错误...')

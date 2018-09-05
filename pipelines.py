@@ -1,12 +1,13 @@
 import pymysql
 import requests
 
-from settings import DJ_NAME, time
+from settings import DJ_NAME, time, COMES
 
 
 class AutomationPipelines:
     '''数据库查询类
     '''
+
     def __init__(self, POOL):
         print('in AutomationPipelines...')
         self.con = POOL.connection()
@@ -45,9 +46,9 @@ class AutomationPipelines:
             if not res_1:
                 print('无需要提交数据')
                 return 0
-                
+
             self.tid = res_1[5]
-            
+
             if res_1[8] == '222':
                 self.update(tid=self.tid, status='3')
 
@@ -68,17 +69,17 @@ class AutomationPipelines:
 
             # 查证信息
             self.log_data = (
-                res_2[0], 
-                res_3[0], 
-                '{} {}'.format(res_3[1], res_3[2]), 
-                res_3[3] - 1 ,
-                res_1[1].replace('-', '/').strip(), 
-                res_1[2].replace('-', '/').strip(), 
-                res_1[3],
-                res_1[5],
-                res_1[6],
-                res_1[7] if not res_1[7] else res_1[7] - 1,
-                res_1[8],
+                res_2[0],                                   # 旅行社番号
+                res_3[0],                                   # 用户姓名
+                '{} {}'.format(res_3[1], res_3[2]),         # 用户英文姓名
+                res_3[3] - 1,                              # 除去领队人数
+                res_1[1].replace('-', '/').strip(),         # 入境日期
+                res_1[2].replace('-', '/').strip(),         # 出境日期
+                res_1[3],                                   # 签证类型
+                res_1[5],                                   # tid
+                res_1[6],                                   # pdf
+                res_1[7] if not res_1[7] else res_1[7] - 1,  # 简版人数
+                res_1[8],                                   # sub_status
             )
             if Undo:
                 self.res_info = ()
@@ -105,17 +106,17 @@ class AutomationPipelines:
                 res = list(res)
                 res = [str(i).strip() if i else '' for i in res]
                 name = res.pop(2)
-                res[1] = f'{res[1]} {name}' if len(f'{res[1]} {name}') < 16 else f'{res[1]}{name}'
+                res[1] = f'{res[1]} {name}' if len(
+                    f'{res[1]} {name}') < 16 else f'{res[1]}{name}'
                 res[2] = 1 if res[2] == '男' else 2
                 m_f[res[2]] += 1
                 res[4] = res[4].replace('-', '/').strip()
-
 
                 res = tuple(res)
                 res_info.append(res)
             self.res_info = res_info
 
-            if '团' not in res_1[3]:
+            if '团' not in res_1[3] and self.log_data[0] not in COMES:
                 self.down_data = ()
                 return 1
 
@@ -129,7 +130,8 @@ class AutomationPipelines:
             res_4 = self.cur.fetchone()
             if not res_4:
                 print('res_4 未查到数据')
-                self.down_data = ('', '', '', '', '', '', '', '', '', '', '', '', '')
+                self.down_data = ('', '', '', '', '', '',
+                                  '', '', '', '', '', '', '')
                 return 1
             self.down_data = (
                 res_2[1], res_2[3], res_2[4], res_2[2], m_f[2], m_f[1],
@@ -202,12 +204,12 @@ class AutomationPipelines:
             elif res[0] in [6, 7] and submit_status == '211':
                 upSql = f"UPDATE dc_travel_business_list SET status='6', submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
                 self.cur.execute(upSql)
- 
+
             self.con.commit()
         except:
             print('数据库执行出错, 进行回滚...')
             self.con.rollback()
-        
+
     def __del__(self):
         print('\n数据库正在关闭连接')
         if self.cur:

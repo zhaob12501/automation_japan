@@ -9,7 +9,7 @@ from automation_transmission import Transmission
 from automation_undo import Undo
 from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
-from settings import *
+from settings import POOL, sleep, strftime, BASE_DIR, ERRINFO
 
 
 class Run:
@@ -22,20 +22,20 @@ class Run:
             '211': self.tra_run,
             '221': self.dow_run
         }
-        
+
     def all_data(self):
         self.LOG_DATA = self.auto.log_data
         self.tid = self.LOG_DATA[7]
         self.status = self.LOG_DATA[10]
         self.LOG_INFO = self.auto.res_info
         self.DOWN_DATA = self.auto.down_data
-    
-    # 登录--clientLogin    
+
+    # 登录--clientLogin
     def cli_run(self):
         if self.cli.run:
             return 1
         self.req_r = self.cli.req
-        
+
     # 提交数据
     def log_run(self):
         print(self.LOG_DATA)
@@ -45,12 +45,14 @@ class Run:
 
     # 上传xls文件
     def tra_run(self):
-        self.tra = Transmission(self.cli.req, self.LOG_DATA, self.LOG_INFO, self.auto)
+        self.tra = Transmission(
+            self.cli.req, self.LOG_DATA, self.LOG_INFO, self.auto)
         self.tra.run
         self.req_r = self.tra.req
-		
+
     def dow_run(self):
-        self.dow = Download(self.cli.req, self.LOG_DATA, self.DOWN_DATA, self.auto)
+        self.dow = Download(self.cli.req, self.LOG_DATA,
+                            self.DOWN_DATA, self.auto)
         self.dow.run
         self.req_r = self.dow.req
 
@@ -66,9 +68,9 @@ class Run:
         # 登陆exe程序
         # ==========
         if self.cli_run():
-            return 
+            return
         os.system('taskkill /F /IM chrome.exe')
-        pool = POOL() 
+        pool = POOL()
         # ========
         # 开始执行
         # ========
@@ -90,14 +92,14 @@ class Run:
                     print('刷新失败...退出...')
                     break
                 if self.auto:
-                    del self.auto 
+                    del self.auto
                 print('刷新成功...等待...')
                 print(strftime('%m/%d %H:%M:%S'))
 
                 path = BASE_DIR
                 try:
-                    for infile in glob.glob(os.path.join(path, '*.pdf') ):  
-                        os.remove(infile) 
+                    for infile in glob.glob(os.path.join(path, '*.pdf')):
+                        os.remove(infile)
                 except:
                     print('.pdf no del')
 
@@ -107,24 +109,22 @@ class Run:
             # =======
             # 数据处理
             # =======
-                   
+
             # 判断是否需要申请
             print('\n有数据进行提交\n')
 
             # 获取需要申请的人员信息
             self.all_data()
-            
+
             self.control[self.status]()
 
             if self.auto:
-                del self.auto 
+                del self.auto
             if self.tid:
                 del self.tid
 
 
 if __name__ == '__main__':
-    # sleep(120)
-
     while True:
         print('in automation_run')
         try:

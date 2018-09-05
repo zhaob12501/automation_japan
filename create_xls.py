@@ -10,18 +10,18 @@ from settings import BASE_DIR, VISA
 
 
 def cre_xls(LGO_INFO):
-	workbook = xlwt.Workbook(encoding = 'ascii')
-	worksheet = workbook.add_sheet('Worksheet')
+    workbook = xlwt.Workbook(encoding='ascii')
+    worksheet = workbook.add_sheet('Worksheet')
 
-	data = [
-	        ('氏名', 'ピンイン', '性別', '居住地域', '生年月日', '旅券番号', '備考')
-	        ]
+    data = [
+        ('氏名', 'ピンイン', '性別', '居住地域', '生年月日', '旅券番号', '備考')
+    ]
 
-	data = data + LGO_INFO
-	for i in range(len(data)):
-	    for j in range(len(data[i])):
-	        worksheet.write(i, j, label = data[i][j])
+    data = data + LGO_INFO
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            worksheet.write(i, j, label=data[i][j])
 
-	workbook.save(BASE_DIR + f'\\{VISA}.xls')
-	print('xls文件准备完成!...')
-	return 0
+    workbook.save(BASE_DIR + f'\\{VISA}.xls')
+    print('xls文件准备完成!...')
+    return 0
