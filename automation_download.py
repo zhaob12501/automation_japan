@@ -5,7 +5,7 @@ import os
 import requests
 
 import client
-from settings import sleep, strftime, AutomationError, LOG_DIR, ERRINFO, DAY
+from settings import sleep, strftime, AutomationError, LOG_DIR, ERRINFO, DAY, INTERFACE
 
 
 class Download:
@@ -156,9 +156,8 @@ class Download:
             f.write(res.content)
         file = {self.SLFH: open('{}.pdf'.format(self.SLFH), 'rb')}
 
-        url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdf'
         data = {'tid': f'{self.LOG_DATA[7]}'}
-        res = requests.post(url, data=data, files=file)
+        res = requests.post(INTERFACE, data=data, files=file)
         if res.json()['status'] == 1:
             self.auPipe.update(
                 tid=self.LOG_DATA[7], status='3', submit_status='222')

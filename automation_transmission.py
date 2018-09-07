@@ -6,7 +6,7 @@ import requests
 
 import client
 import create_xls
-from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES
+from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES, INTERFACE
 
 
 class Transmission:
@@ -95,9 +95,7 @@ class Transmission:
             self.FH = re.findall(reg, res.text)[0]
 
         if not self.LOG_DATA[8]:
-            url = 'http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/japanInsertPdftext'
-            data = {'tid': self.LOG_DATA[7], 'text': self.FH}
-            requests.post(url, data=data).json()
+            self.auPipe.update(tid=self.LOG_DATA[7], pdf=self.FH)
 
         if res.url == self.login_url:
             raise AutomationError('登陆失效, 重新登陆...')
