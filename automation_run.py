@@ -127,13 +127,19 @@ class Run:
 if __name__ == '__main__':
     while True:
         print('in automation_run')
+        n = 10
         try:
             open_client()
             while True:
                 print('in getCookies')
                 if getCookies():
                     break
+                n -= 1
+                if not n:
+                    break
                 sleep(10)
+            if not n:
+                continue
             r = Run()
             r.run
         except Exception as e:

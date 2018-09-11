@@ -46,7 +46,7 @@ class Undo:
             res = self.req.post(self.identity_list_url, data=data)
             reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(
                 self.FH)
-            self.identity_id = re.findall(reg, res.text)[0]
+            self.identity_id = re.findall(reg, res.text)
             print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
@@ -60,23 +60,30 @@ class Undo:
                 print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
 
             except:
-                for i in range(1, 31):
-                    ne = f'?p={i}&s=1&d=2'
-                    url = self.identity_list_url + ne
-                    res = self.req.get(url)
-                    if res.url == self.login_url:
-                        raise AutomationError('登陆失效...')
-                    try:
-                        self.identity_id = res.text.split(self.info, 1)[1].split(
-                            '<tr class="', 1)[1].split('"', 1)[0][-7:]
-                        print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
-                        self.get_url = url
-                        break
-                    except:
-                        continue
-                else:
-                    self.auPipe.update(
-                        tid=self.LOG_DATA[7], submit_status='111')
+                try:
+                    for i in range(1, 31):
+                        ne = f'?p={i}&s=1&d=2'
+                        url = self.identity_list_url + ne
+                        res = self.req.get(url)
+                        if res.url == self.login_url:
+                            raise AutomationError('登陆失效...')
+                        try:
+                            self.identity_id = res.text.split(self.info, 1)[1].split(
+                                '<tr class="', 1)[1].split('"', 1)[0][-7:]
+                            print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
+                            self.get_url = url
+                            break
+                        except:
+                            continue
+                    else:
+                        self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
+                        return 
+                except:
+                    self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
+        if not self.identity_id:
+            self.auPipe.update(self.LOG_DATA[7], submit_status="111", pdf="")
+        self.identity_id = self.identity_id[0]
+            
 
     # 2、执行撤销操作
     def undo(self):
