@@ -33,17 +33,17 @@ class Login:
 
         self.auPipe = auto
 
-    def validation(self):
-        print('in Login validation')
-        res = self.req.get(
-            'https://churenkyosystem.com/member/identity_list.php')
-        if self.info in res.text:
-            invalid = res.text.split(self.info)[0].split(
-                '<a href="identity_info.php?IDENTITY_ID')[-1]
-            if '発行済' in invalid:
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
-                return 0
-        return 1
+    # def validation(self):
+        # print('in Login validation')
+        # res = self.req.get(
+        #     'https://churenkyosystem.com/member/identity_list.php')
+        # if self.info in res.text:
+        #     invalid = res.text.split(self.info)[0].split(
+        #         '<a href="identity_info.php?IDENTITY_ID')[-1]
+        #     if '発行済' in invalid:
+        #         self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
+        #         return 0
+        # return 1
 
     # 第三步 跳转至信息录入页面，并检测番号
     def top(self):
@@ -324,17 +324,14 @@ class Login:
     @property
     def run(self):
         try:
-            if self.validation():
-                self.top()
+            self.top()
+            sleep(1)
 
-                sleep(1)
+            self.confirm()
+            sleep(1)
 
-                self.confirm()
-
-                sleep(1)
-
-                self.con_two()
-                print('=========')
+            self.con_two()
+            print('=========')
             return 1
         except AttributeError:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
