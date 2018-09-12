@@ -144,7 +144,7 @@ if __name__ == '__main__':
             r.run
         except Exception as e:
             print('automation_run 出现错误...')
-            ERRINFO(file="automation_run", e=e)
+            ERRINFO(name="系统重启", file="automation_run", e=e)
         finally:
             print('系统重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')

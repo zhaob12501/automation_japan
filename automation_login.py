@@ -344,14 +344,14 @@ class Login:
             elif ae.errorinfo == "未提交成功":
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
             else:
-                raise AutomationError('登陆失效, 重新登陆...')
+                raise AutomationError('登陆失效, 重新登陆...', "automation_login")
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_login", ae.errorinfo)
         except Exception as e:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_login 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
-            sleep(3)
+            raise AutomationError(e, "automation_login")
         finally:
             try:
                 del self.auPipe

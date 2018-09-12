@@ -117,8 +117,9 @@ class Undo:
             self.search_info()
             sleep(1)
             self.undo()
-        except AttributeError:
+        except AttributeError as ate:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError(ate, "automation_undo")
         except IndexError:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             raise AutomationError("列表超出范围", "automation_undo")
@@ -127,5 +128,6 @@ class Undo:
         except Exception as e:
             print('automation_undo 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_undo", e)
+            raise AutomationError(e, "automation_undo")
         finally:
             del self.auPipe

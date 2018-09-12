@@ -179,8 +179,9 @@ class Download:
             self.identity_return()
             sleep(1)
             self.down()
-        except AttributeError:
+        except AttributeError as ate:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+            raise AutomationError(ate, "automation_download")
         except IndexError:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             raise AutomationError("列表超出范围", "automation_download")
@@ -190,6 +191,7 @@ class Download:
             print('automation_download 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_download", e)
+            raise AutomationError(e, "automation_download")
         finally:
             try:
                 del self.auPipe
