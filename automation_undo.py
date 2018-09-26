@@ -14,8 +14,7 @@ class Undo:
         print('启动撤回模块...')
         self.auPipe = auto
         self.req = req
-        self.FH = LOG_DATA[8] if len(
-            LOG_DATA[8]) == 9 else LOG_DATA[8].split(".pdf")[0][-9:]
+        self.FH = LOG_DATA[8]
 
         self.LOG_DATA = LOG_DATA
         self.identity_list_url = 'https://churenkyosystem.com/member/identity_list.php'

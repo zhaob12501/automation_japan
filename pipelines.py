@@ -69,17 +69,28 @@ class AutomationPipelines:
 
             # 查证信息
             self.log_data = (
-                res_2[0],                                   # 旅行社番号
-                res_3[0],                                   # 用户姓名
-                '{} {}'.format(res_3[1], res_3[2]),         # 用户英文姓名
-                res_3[3] - 1,                              # 除去领队人数
-                res_1[1].replace('-', '/').strip(),         # 入境日期
-                res_1[2].replace('-', '/').strip(),         # 出境日期
-                res_1[3],                                   # 签证类型
-                res_1[5],                                   # tid
-                res_1[6],                                   # pdf
-                res_1[7] if not res_1[7] else res_1[7] - 1,  # 简版人数
-                res_1[8],                                   # sub_status
+                # 旅行社番号
+                res_2[0],
+                # 用户姓名
+                res_3[0],
+                # 用户英文姓名
+                '{} {}'.format(res_3[1], res_3[2]),
+                # 除去领队人数
+                res_3[3] - 1,
+                # 入境日期
+                res_1[1].replace('-', '/').strip(),
+                # 出境日期
+                res_1[2].replace('-', '/').strip(),
+                # 签证类型
+                res_1[3],
+                # tid
+                res_1[5],
+                # pdf
+                res_1[6] if (not res_1[6]) or len(res_1[6]) == 9 else res_1[6].split(".pdf")[0][-9:],
+                # 简版人数
+                res_1[7] if not res_1[7] else res_1[7] - 1,
+                # sub_status
+                res_1[8],
             )
             if Undo:
                 self.res_info = ()

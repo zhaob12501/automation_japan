@@ -49,6 +49,7 @@ class Login:
     def top(self):
         print('in Login top')
         res = self.req.get(self.top_url)
+        print(res.url)
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
         print('in Login top 2')
@@ -56,7 +57,12 @@ class Login:
         assert res.url != self.login_url
         print('in Login top 3')
         reg = r'<input type="hidden" name="_PAGE_KEY" value="(.*?)" />'
-        self._PAGE_KEY = re.findall(reg, res.text)[0]
+        page_key = re.findall(reg, res.text)
+        print(page_key)
+        if len(page_key) == 0:
+            raise AutomationError("_PAGE_KEY 没有")
+        
+        self._PAGE_KEY = page_key[0] 
 
         print('in Login top data')
         # 指定番号

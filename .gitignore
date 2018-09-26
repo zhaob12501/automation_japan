@@ -24,3 +24,4 @@ settings.py
 *.exe
 .vscode
 user_pwd
+otherfile

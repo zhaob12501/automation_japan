@@ -9,7 +9,7 @@ from automation_transmission import Transmission
 from automation_undo import Undo
 from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
-from settings import POOL, sleep, strftime, BASE_DIR, ERRINFO
+from settings import POOL, sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
 
 
 class Run:
@@ -41,6 +41,28 @@ class Run:
         print(self.LOG_DATA)
         self.log = Login(self.cli.req, self.LOG_DATA, self.auto)
         self.log.run
+        # ===
+        # try:
+        #     self.log.top()
+        #     self.log.confirm()
+        #     self.log.con_two()
+        #     print('=========')
+        #     return 1
+        # except AutomationError as ae:
+        #     if ae.errorinfo == '未检测到番号':
+        #         self.log.auPipe.update(tid=self.LOG_DATA[7], status='8')
+        #     elif ae.errorinfo == "未提交成功":
+        #         self.log.auPipe.update(tid=self.LOG_DATA[7], status='9')
+        #     else:
+        #         raise AutomationError('登陆失效, 重新登陆...', "automation_login")
+        #     ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
+        #             "automation_login", ae.errorinfo)
+        # except Exception as e:
+        #     self.log.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        #     print('automation_login 出现错误...')
+        #     ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
+        #     raise AutomationError(e, "automation_login")
+        # ===
         self.req_r = self.log.req
 
     # 上传xls文件
@@ -71,6 +93,7 @@ class Run:
             return
         os.system('taskkill /F /IM chrome.exe')
         pool = POOL()
+        st = TIM()
         # ========
         # 开始执行
         # ========
@@ -87,6 +110,10 @@ class Run:
 
             self.data = self.auto.data()
             if not self.data:
+                if TIM() - st > 3600:
+                    pool.close()
+                    pool = POOL()
+                    st = TIM()
                 print('没有数据, 准备刷新...')
                 if self.cli.refresh(self.req_r):
                     print('刷新失败...退出...')
@@ -126,25 +153,24 @@ class Run:
 
 if __name__ == '__main__':
     while True:
-        print('in automation_run')
-        n = 10
         try:
-            open_client()
-            while True:
-                print('in getCookies')
-                if getCookies():
-                    break
-                n -= 1
+            print('in automation_run')
+            n = 10
+            try:
+                open_client()
+                while True:
+                    print('in getCookies')
+                    if getCookies() or (not n):
+                        break
+                    n -= 1
+                    sleep(10)
                 if not n:
-                    break
-                sleep(10)
-            if not n:
-                continue
-            r = Run()
-            r.run
-        except Exception as e:
-            print('automation_run 出现错误...')
-            ERRINFO(name="系统重启", file="automation_run", e=e)
+                    continue
+                r = Run()
+                r.run
+            except Exception:
+                print('automation_run 出现错误...')
+                ERRINFO(name="系统重启", file="automation_run")
         finally:
             print('系统重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
