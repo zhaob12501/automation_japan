@@ -205,9 +205,9 @@ class AutomationPipelines:
             elif res[1] == '3':
                 if submit_status == '111':
                     if res[0] == 1:
-                        upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='', submit_status='111' WHERE tid={tid};"
+                        upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='', repatriations_pdf='', submit_status='111' WHERE tid={tid};"
                     else:
-                        upSql = f"UPDATE dc_travel_business_list SET status='7', repatriation_pdf='', submit_status='111' WHERE tid={tid};"
+                        upSql = f"UPDATE dc_travel_business_list SET status='7', repatriation_pdf='', repatriations_pdf='', submit_status='111' WHERE tid={tid};"
                     self.cur.execute(upSql)
                 elif submit_status in ['221', '222'] and not res[2] and pdf:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"

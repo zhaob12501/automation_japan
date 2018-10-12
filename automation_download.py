@@ -152,15 +152,14 @@ class Download:
         res = self.req.get(url)
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
-        with open('{}.pdf'.format(self.SLFH), 'wb') as f:
-            f.write(res.content)
-        file = {self.SLFH: open('{}.pdf'.format(self.SLFH), 'rb')}
+        # with open('{}.pdf'.format(self.SLFH), 'wb') as f:
+        #     f.write(res.content)
+        file = {self.SLFH: res.content}
 
         data = {'tid': f'{self.LOG_DATA[7]}'}
         res = requests.post(INTERFACE, data=data, files=file)
         if res.json()['status'] == 1:
-            self.auPipe.update(
-                tid=self.LOG_DATA[7], status='3', submit_status='222')
+            self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
 
             print('-' * 20, '\nthe info is OK\n', '-' * 20)
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
@@ -169,7 +168,8 @@ class Download:
                 json.dump(log, f)
                 f.write(',\n')
             print('归国报告书下载OK\n')
-        self.auPipe.update(tid=self.LOG_DATA[7], status='2')
+        else:
+            self.auPipe.update(tid=self.LOG_DATA[7], status='2')
 
     @property
     def run(self):
