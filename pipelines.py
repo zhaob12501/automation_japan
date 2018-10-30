@@ -223,8 +223,8 @@ class AutomationPipelines:
 
     def __del__(self):
         print('\n数据库正在关闭连接')
-        if self.cur:
+        if hasattr(self, "cur"):
             self.cur.close()
-        if self.con:
+        if hasattr(self, "con"):
             self.con.close()
         print('数据库已关闭连接\n')

@@ -41,28 +41,6 @@ class Run:
         print(self.LOG_DATA)
         self.log = Login(self.cli.req, self.LOG_DATA, self.auto)
         self.log.run
-        # ===
-        # try:
-        #     self.log.top()
-        #     self.log.confirm()
-        #     self.log.con_two()
-        #     print('=========')
-        #     return 1
-        # except AutomationError as ae:
-        #     if ae.errorinfo == '未检测到番号':
-        #         self.log.auPipe.update(tid=self.LOG_DATA[7], status='8')
-        #     elif ae.errorinfo == "未提交成功":
-        #         self.log.auPipe.update(tid=self.LOG_DATA[7], status='9')
-        #     else:
-        #         raise AutomationError('登陆失效, 重新登陆...', "automation_login")
-        #     ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
-        #             "automation_login", ae.errorinfo)
-        # except Exception as e:
-        #     self.log.auPipe.update(tid=self.LOG_DATA[7], status='2')
-        #     print('automation_login 出现错误...')
-        #     ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
-        #     raise AutomationError(e, "automation_login")
-        # ===
         self.req_r = self.log.req
 
     # 上传xls文件

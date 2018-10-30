@@ -33,6 +33,7 @@ def getCookies():
 # 第一步 打开exe登录
 def open_client():
     m = PyMouse()
+    m.click(10000, 10000)
     k = PyKeyboard()
     subprocess.Popen(EXE_PWD)
     sleep(2)
