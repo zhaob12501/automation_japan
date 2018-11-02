@@ -10,7 +10,7 @@ from settings import sleep, strftime, DAY, AutomationError, LOG_DIR, ERRINFO
 
 
 class Undo:
-    def __init__(self, req, LOG_DATA, auto):
+    def __init__(self, req, LOG_DATA, auto=""):
         print('启动撤回模块...')
         self.auPipe = auto
         self.req = req
@@ -29,6 +29,8 @@ class Undo:
                 self.LOG_DATA[1], self.LOG_DATA[2], self.LOG_DATA[9])
         # 登录页面url
         self.login_url = 'https://churenkyosystem.com/member/login.php'
+
+        self.run
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):

@@ -51,8 +51,8 @@ class Run:
         self.req_r = self.tra.req
 
     def dow_run(self):
-        self.dow = Download(self.cli.req, self.LOG_DATA,
-                            self.DOWN_DATA, self.auto)
+        self.dow = Download(self.cli.req, self.LOG_DATA, self.auto)
+                            # self.DOWN_DATA, 
         self.dow.run
         self.req_r = self.dow.req
 

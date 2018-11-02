@@ -9,7 +9,7 @@ from settings import DAY, sleep, strftime, AutomationError, LOG_DIR, ERRINFO
 
 
 class Login:
-    def __init__(self, REQ, LOG_DATA, auto):
+    def __init__(self, REQ, LOG_DATA, auto=""):
         print('in Login...')
         self.req = REQ
         self.LOG_DATA = LOG_DATA
@@ -119,11 +119,11 @@ class Login:
             except Exception as e:
                 print(e)
             if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
-                self.auPipe.update(
-                    tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
+                update_data = {"tid": self.LOG_DATA[7], "submit_status": '211', "pdf": self.FH}
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
             else:
-                self.auPipe.update(
-                    tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
+                update_data = {"tid": self.LOG_DATA[7], "submit_status": '222', "pdf": self.FH}
+                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
         else:
             if res.url == self.login_url:
                 raise AutomationError('登陆失效, 重新登陆...')
@@ -138,6 +138,8 @@ class Login:
                 f.write(',\n')
         except:
             pass
+        
+        return update_data
 
     # 验证数据
     def files_data(self):
@@ -329,37 +331,37 @@ class Login:
 
     @property
     def run(self):
+        update_data = {}
         try:
             self.top()
-            sleep(1)
-
             self.confirm()
-            sleep(1)
-
             self.con_two()
             print('=========')
-            return 1
         except AttributeError:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
         except IndexError:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             raise AutomationError("列表超出范围", "automation_login")
         except AutomationError as ae:
             if ae.errorinfo == '未检测到番号':
+                update_data = {"tid": self.LOG_DATA[7], "status": '8'}
                 self.auPipe.update(tid=self.LOG_DATA[7], status='8')
             elif ae.errorinfo == "未提交成功":
+                update_data = {"tid": self.LOG_DATA[7], "status": '9'}
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
             else:
                 raise AutomationError('登陆失效, 重新登陆...', "automation_login")
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_login", ae.errorinfo)
         except Exception as e:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_login 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
             raise AutomationError(e, "automation_login")
         finally:
-            try:
+            if hasattr(self, "auPipe"):
                 del self.auPipe
-            except:
-                pass
+            return update_data

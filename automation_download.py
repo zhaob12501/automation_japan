@@ -9,11 +9,10 @@ from settings import sleep, strftime, AutomationError, LOG_DIR, ERRINFO, DAY, IN
 
 
 class Download:
-    def __init__(self, req, LOG_DATA, DOWN_DATA, auto):
+    def __init__(self, req, LOG_DATA, auto=""):
         self.auPipe = auto
         self.req = req
         self.LOG_DATA = LOG_DATA
-        self.DOWN_DATA = DOWN_DATA
         self.SLFH = self.LOG_DATA[8]
 
         if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
@@ -88,38 +87,38 @@ class Download:
         self._PAGE_KEY = re.findall(reg, res.text)[0]
 
         data = {
-            "JAPAN_PREPARED": self.DOWN_DATA[0],
-            "CHINA_TEL": self.DOWN_DATA[1],
-            "CHINA_FAX": self.DOWN_DATA[2],
-            "CHINA_PREPARED": self.DOWN_DATA[3],
-            "GROUP_NAME": '',
-            "NUMBER_OF_TOURISTS_MALE": self.DOWN_DATA[4],
-            "NUMBER_OF_TOURISTS_FEMALE": self.DOWN_DATA[5],
-            "TOURISTS_ADDRESS": '',
-            "NUMBER_OF_ESCORT": '',
-            "NUMBER_OF_GUIDE": '',
-            "CHANGE_SCHEDULE_CONTENTS": '',
-            "CHANGE_SCHEDULE_REASON": '',
-            "TRANSLATOR_NAME": '',
-            "TRANSLATOR_PREF": '',
-            "TRANSLATOR_NUMBER": '',
-            "TRANSLATOR_CONTACT": '',
-            "JAPAN_ESCORT_NAME": '',
-            "JAPAN_ESCORT_CONTACT": '',
-            "JAPAN_ESCORT_DEPARTMENT": '',
-            "CHINA_ESCORT_NAME": '',
-            "CHINA_ESCORT_CONTACT": '',
-            "CHINA_ESCORT_DEPARTMENT": '',
-            "PASSENGER_NAME": '',
-            "PASSENGER_ADDRESS": '',
-            "PASSENGER_TEL": '',
-            "PASSENGER_NUMBER": '',
-            "PASSENGER_AREA": '',
-            "FLIGHT_NUMBER": self.DOWN_DATA[6],
-            "DEPARTURE_PLACE": self.DOWN_DATA[7],
-            "DEPARTURE_TIME": self.DOWN_DATA[8],
-            "ARRIVAL_PLACE": self.DOWN_DATA[9],
-            "ARRIVAL_TIME": self.DOWN_DATA[10],
+            "JAPAN_PREPARED": "",
+            "CHINA_TEL": "",
+            "CHINA_FAX": "",
+            "CHINA_PREPARED": "",
+            "GROUP_NAME": "",
+            "NUMBER_OF_TOURISTS_MALE": "",
+            "NUMBER_OF_TOURISTS_FEMALE": "",
+            "TOURISTS_ADDRESS": "",
+            "NUMBER_OF_ESCORT": "",
+            "NUMBER_OF_GUIDE": "",
+            "CHANGE_SCHEDULE_CONTENTS": "",
+            "CHANGE_SCHEDULE_REASON": "",
+            "TRANSLATOR_NAME": "",
+            "TRANSLATOR_PREF": "",
+            "TRANSLATOR_NUMBER": "",
+            "TRANSLATOR_CONTACT": "",
+            "JAPAN_ESCORT_NAME": "",
+            "JAPAN_ESCORT_CONTACT": "",
+            "JAPAN_ESCORT_DEPARTMENT": "",
+            "CHINA_ESCORT_NAME": "",
+            "CHINA_ESCORT_CONTACT": "",
+            "CHINA_ESCORT_DEPARTMENT": "",
+            "PASSENGER_NAME": "",
+            "PASSENGER_ADDRESS": "",
+            "PASSENGER_TEL": "",
+            "PASSENGER_NUMBER": "",
+            "PASSENGER_AREA": "",
+            "FLIGHT_NUMBER": "",
+            "DEPARTURE_PLACE": "",
+            "DEPARTURE_TIME": "",
+            "ARRIVAL_PLACE": "",
+            "ARRIVAL_TIME": "",
             "_PAGE_KEY": self._PAGE_KEY,
             "BTN_CHECK_x": '確認'
         }
@@ -142,13 +141,15 @@ class Download:
             self.req = c.req
             res = self.req.get(url)
 
+        # reg = r"window\.open\('\.(.*?)', '_blank'\);"
+
         self.down_url = res.text.split(
             "window.open('.")[1].split("', '_blank');")[0]
         print('Download the fourth step is successful')
 
     def down(self):
         url = 'https://churenkyosystem.com/member' + self.down_url
-
+        url = url + self.identity_id if url[-1] == "=" else url
         res = self.req.get(url)
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
@@ -163,8 +164,7 @@ class Download:
 
             print('-' * 20, '\nthe info is OK\n', '-' * 20)
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
-                log = {'归国': self.DOWN_DATA,
-                       'time': strftime('%m/%d %H:%M:%S')}
+                log = {'归国': "", 'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
             print('归国报告书下载OK\n')

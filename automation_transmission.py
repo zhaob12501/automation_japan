@@ -10,7 +10,7 @@ from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strfti
 
 
 class Transmission:
-    def __init__(self, req, LOG_DATA, LOG_INFO, auto):
+    def __init__(self, req, LOG_DATA, LOG_INFO, auto=""):
         self.req = req
         self.LOG_DATA = LOG_DATA
         self.LOG_INFO = LOG_INFO
@@ -30,6 +30,7 @@ class Transmission:
 
         print('开始准备提交数据')
         self.auPipe = auto
+        self.run
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
@@ -94,9 +95,6 @@ class Transmission:
         if not self.FH:
             self.FH = re.findall(reg, res.text)[0]
 
-        if not self.LOG_DATA[8]:
-            self.auPipe.update(tid=self.LOG_DATA[7], pdf=self.FH)
-
         if res.url == self.login_url:
             raise AutomationError('登陆失效, 重新登陆...')
         print('The Transmission third step is successful!\n')
@@ -119,64 +117,59 @@ class Transmission:
             BASE_DIR + f'\\{VISA}.xls', 'rb'), 'application/vnd.ms-excel')}
         res = self.req.post(url, data=data, files=files)
         if '登録が完了しました' not in res.text:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             if "errorMsg" in res.text:
+                update_data = {"tid": self.LOG_DATA[7], "status": '9'}
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
-                errorMsg = res.text.split('<p class="errorMsg">')[
-                    1].split('</p>')[0]
+                errorMsg = res.text.split('<p class="errorMsg">')[1].split('</p>')[0]
                 print(errorMsg)
-                ERRINFO(self.LOG_DATA[7],
-                        self.LOG_DATA[1], "errorMsg", errorMsg)
-            return -1
+                ERRINFO(self.LOG_DATA[7],self.LOG_DATA[1], "errorMsg", errorMsg)
+            return update_data
+        print('-' * 20, '\nThe Transmission fourth step is successful\n', '-' * 20)
+        print('\tFile upload successful!')
+        print('\n===xls文件上传完成OK===\n\n')
+        if '团体' not in self.LOG_DATA[6] and self.LOG_DATA[0] not in COMES:
+            update_data = {"tid": self.LOG_DATA[7], "status": '3', "submit_status": '222', "pdf": self.FH}
+            self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222', pdf=self.FH)
+            print('提交完成！\n========\n', sep='\n')
+        else:
+            update_data = {"tid": self.LOG_DATA[7], "submit_status": '221', "pdf": self.FH}
+            self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
         try:
-            print('-' * 20, '\nThe Transmission fourth step is successful\n', '-' * 20)
-            print('\tFile upload successful!')
-            print('\n===xls文件上传完成OK===\n\n')
-            if '团体' not in self.LOG_DATA[6] and self.LOG_DATA[0] not in COMES:
-                self.auPipe.update(
-                    tid=self.LOG_DATA[7], status='3', submit_status='222', pdf=self.FH)
-                print('提交完成！\n========\n', sep='\n')
-            else:
-                self.auPipe.update(
-                    tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
-            return 1
+            with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
+                log = {'xls提交': self.LOG_INFO,
+                        'time': strftime('%m/%d %H:%M:%S')}
+                json.dump(log, f)
+                f.write(',\n')
         except:
-            return -1
+            pass
+        return update_data
 
     @property
     def run(self):
         try:
             self.search_info()
-            sleep(1)
             self.upload_one()
-            sleep(1)
-            s = self.upload_two()
-            if s == 1:
-                print(self.LOG_DATA[6])
-                try:
-                    with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
-                        log = {'xls提交': self.LOG_INFO,
-                               'time': strftime('%m/%d %H:%M:%S')}
-                        json.dump(log, f)
-                        f.write(',\n')
-                except:
-                    pass
+            update_data = self.upload_two()
         except AttributeError as ate:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             raise AutomationError(ate, "automation_transmission")
         except IndexError:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             raise AutomationError("列表超出范围", "automation_transmission")
         except AutomationError:
             raise AutomationError('登陆失效, 重新登陆...', "automation_transmission")
         except Exception as e:
+            update_data = {"tid": self.LOG_DATA[7], "status": '2'}
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
             print('automation_transmission error...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_transmission", e)
             raise AutomationError(e, "automation_transmission")
         finally:
-            try:
+            if hasattr(self, "auPipe"):
                 del self.auPipe
-            except:
-                pass
+            return update_data
