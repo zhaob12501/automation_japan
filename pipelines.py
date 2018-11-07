@@ -9,10 +9,10 @@ class AutomationPipelines:
     '''
 
     def __init__(self, POOL):
-        print('in AutomationPipelines...')
+        # print('in AutomationPipelines...')
         self.con = POOL.connection()
         self.cur = self.con.cursor()
-        print('连接成功...')
+        # print('连接成功...')
 
     def data(self):
         try:
@@ -121,6 +121,7 @@ class AutomationPipelines:
                     f'{res[1]} {name}') < 16 else f'{res[1]}{name}'
                 res[2] = 1 if res[2] == '男' else 2
                 m_f[res[2]] += 1
+                res[3] = res[3][:6]
                 res[4] = res[4].replace('-', '/').strip()
 
                 res = tuple(res)
@@ -222,9 +223,9 @@ class AutomationPipelines:
             self.con.rollback()
 
     def __del__(self):
-        print('\n数据库正在关闭连接')
+        # print('\n数据库正在关闭连接')
         if hasattr(self, "cur"):
             self.cur.close()
         if hasattr(self, "con"):
             self.con.close()
-        print('数据库已关闭连接\n')
+        # print('数据库已关闭连接\n')

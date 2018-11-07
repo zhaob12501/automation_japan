@@ -109,6 +109,7 @@ class Run:
                     print('.pdf no del')
 
                 sleep(5)
+                os.system("cls")
                 continue
 
             # =======
