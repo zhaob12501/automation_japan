@@ -34,6 +34,7 @@ def getCookies():
 def open_client():
     m = PyMouse()
     m.click(10000, 10000)
+    sleep(2)
     k = PyKeyboard()
     subprocess.Popen(EXE_PWD)
     sleep(2)
