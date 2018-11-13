@@ -8,13 +8,11 @@ class AutomationPipelines:
     '''数据库查询类
     '''
 
-    def __init__(self, POOL):
-        # print('in AutomationPipelines...')
-        self.con = POOL.connection()
-        self.cur = self.con.cursor()
-        # print('连接成功...')
+    def __init__(self, con):
+        self.con = con
 
     def data(self):
+        self.cur = self.con.cursor()
         try:
             print('正在查询数据...')
             # 符合条件的旅行社
@@ -155,6 +153,7 @@ class AutomationPipelines:
             print('归国报告数据查询失败！')
             print(e, '归国报告数据查询失败！...')
 
+        self.cur.close()
         return 1
 
     def update(self, tid='', status='', submit_status='', pdf=''):
@@ -183,6 +182,8 @@ class AutomationPipelines:
                 status = status 『3 --> update_time = int(time())』
             }
         '''
+        self.cur = self.con.cursor()
+
         sql = f"SELECT status, submit_status, repatriation_pdf FROM dc_travel_business_list where tid = {tid}"
         self.cur.execute(sql)
         res = self.cur.fetchone()
@@ -221,6 +222,8 @@ class AutomationPipelines:
         except:
             print('数据库执行出错, 进行回滚...')
             self.con.rollback()
+        
+        self.cur.close()
 
     def __del__(self):
         # print('\n数据库正在关闭连接')
