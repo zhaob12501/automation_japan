@@ -34,33 +34,31 @@ class Run:
     def cli_run(self):
         if self.cli.run:
             return 1
-        self.req_r = self.cli.req
+        self.req = self.cli.req
 
     # 提交数据
     def log_run(self):
         print(self.LOG_DATA)
-        self.log = Login(self.cli.req, self.LOG_DATA, self.auto)
+        self.log = Login(self.req, self.LOG_DATA, self.auto)
         self.log.run
-        self.req_r = self.log.req
+        self.req = self.log.req
 
     # 上传xls文件
     def tra_run(self):
-        self.tra = Transmission(
-            self.cli.req, self.LOG_DATA, self.LOG_INFO, self.auto)
+        self.tra = Transmission(self.req, self.LOG_DATA, self.LOG_INFO, self.auto)
         self.tra.run
-        self.req_r = self.tra.req
+        self.req = self.tra.req
 
     def dow_run(self):
-        self.dow = Download(self.cli.req, self.LOG_DATA, self.auto)
-                            # self.DOWN_DATA, 
+        self.dow = Download(self.req, self.LOG_DATA, self.auto)
         self.dow.run
-        self.req_r = self.dow.req
+        self.req = self.dow.req
 
     def undo_run(self):
         print(self.LOG_DATA)
-        self.und = Undo(self.cli.req, self.LOG_DATA, self.auto)
+        self.und = Undo(self.req, self.LOG_DATA, self.auto)
         self.und.run
-        self.req_r = self.und.req
+        self.req = self.und.req
 
     @property
     def run(self):
@@ -80,8 +78,6 @@ class Run:
                 self.auto = AutomationPipelines()
                 self.auto.data()
                 # 数据处理
-
-                # 判断是否需要申请
                 print('\n有数据进行提交\n')
 
                 # 获取需要申请的人员信息
@@ -90,7 +86,7 @@ class Run:
 
             else:
                 print('没有数据, 等待...')
-                if self.cli.refresh(self.req_r):
+                if self.cli.refresh(self.req):
                     break
                 print(strftime('%m/%d %H:%M:%S'))
 
