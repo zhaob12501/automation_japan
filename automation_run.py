@@ -9,7 +9,7 @@ from automation_transmission import Transmission
 from automation_undo import Undo
 from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
-from settings import POOL, sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
+from settings import sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
 
 
 class Run:
@@ -64,92 +64,61 @@ class Run:
 
     @property
     def run(self):
-        # ==========
-        # 登陆exe程序
-        # ==========
         if self.cli_run():
             return
         os.system('taskkill /F /IM chrome.exe')
-        pool = POOL()
-        st = TIM()
-        # ========
         # 开始执行
-        # ========
         while True:
-            print('\nin run...')
-            try:
-                self.auto = AutomationPipelines(pool)
-            except:
-                if self.auto:
-                    del self.auto
-                print('数据库连接超时...重连...')
-                continue
-            print('数据库连接完毕...')
+            print('\nin Run...')
+            url = "http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/sqlWhere"
+            data = {
+                "name": "travel_business_list",
+                "where": "status=1 or status=2 or submit_status=3"
+            }
+            res = requests.post(url, data=data)
+            if res.json():
+                self.auto = AutomationPipelines()
+                self.auto.data()
+                # 数据处理
 
-            self.data = self.auto.data()
-            if not self.data:
-                if TIM() - st > 3600:
-                    pool.close()
-                    pool = POOL()
-                    st = TIM()
-                print('没有数据, 准备刷新...')
+                # 判断是否需要申请
+                print('\n有数据进行提交\n')
+
+                # 获取需要申请的人员信息
+                self.all_data()
+                self.control[self.status]()
+
+            else:
+                print('没有数据, 等待...')
                 if self.cli.refresh(self.req_r):
-                    print('刷新失败...退出...')
                     break
-                if self.auto:
-                    del self.auto
-                print('刷新成功...等待...')
                 print(strftime('%m/%d %H:%M:%S'))
 
-                path = BASE_DIR
-                try:
-                    for infile in glob.glob(os.path.join(path, '*.pdf')):
-                        os.remove(infile)
-                except:
-                    print('.pdf no del')
+                for infile in glob.glob(os.path.join(BASE_DIR, '*.pdf')):
+                    os.remove(infile)
 
                 sleep(5)
-                continue
-
-            # =======
-            # 数据处理
-            # =======
-
-            # 判断是否需要申请
-            print('\n有数据进行提交\n')
-
-            # 获取需要申请的人员信息
-            self.all_data()
-
-            self.control[self.status]()
-
-            if self.auto:
-                del self.auto
-            if self.tid:
-                del self.tid
 
 
 if __name__ == '__main__':
     while True:
         try:
             print('in automation_run')
-            n = 10
-            try:
-                open_client()
-                while True:
-                    print('in getCookies')
-                    if getCookies() or (not n):
-                        break
-                    n -= 1
-                    sleep(10)
-                if not n:
-                    continue
-                r = Run()
-                r.run
-            except Exception:
-                print('automation_run 出现错误...')
-                ERRINFO(name="系统重启", file="automation_run")
+            # 登陆exe程序
+            open_client()
+            for _ in range(10):
+                print('in getCookies')
+                if getCookies():
+                    break
+                sleep(10)
+            else:
+                continue
+
+            r = Run()
+            r.run
+        except Exception:
+            print('automation_run 出现错误... 系统重启...')
+            ERRINFO(name="系统重启", file="automation_run")
         finally:
-            print('系统重启...')
             os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
             os.system('taskkill /f /im chrome.exe')

@@ -13,7 +13,7 @@ class Download:
         self.auPipe = auto
         self.req = req
         self.LOG_DATA = LOG_DATA
-        self.SLFH = self.LOG_DATA[8]
+        self.SLFH = self.LOG_DATA[8][:9] + ".pdf"
 
         if self.LOG_DATA[3] == self.LOG_DATA[9] or self.LOG_DATA[9] is None:
             self.info = '{0}（{1}）：{2}名'.format(
@@ -153,8 +153,6 @@ class Download:
         res = self.req.get(url)
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
-        # with open('{}.pdf'.format(self.SLFH), 'wb') as f:
-        #     f.write(res.content)
         file = {self.SLFH: res.content}
 
         data = {'tid': f'{self.LOG_DATA[7]}'}

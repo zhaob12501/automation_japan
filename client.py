@@ -36,6 +36,7 @@ def open_client():
     m.click(10000, 10000)
     sleep(2)
     k = PyKeyboard()
+    sleep(2)
     subprocess.Popen(EXE_PWD)
     sleep(2)
     m.click(COORDINATES_1[0], COORDINATES_1[1])
@@ -82,7 +83,7 @@ class ClientLogin:
             'SUBMIT_LOGIN_x': 'ログイン'
         }
         print('正在传输,请耐心等待...')
-        sleep(5)
+        # sleep(5)
         res = self.req.post(self.login_url, data=from_data)
         if res.url == self.top_url:
             return 1
@@ -105,6 +106,6 @@ class ClientLogin:
             if self.login():
                 break
             sleep(10)
-            return 0
         else:
             return 1
+        return 0

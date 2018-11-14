@@ -6,7 +6,7 @@ import requests
 
 import client
 import create_xls
-from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES, INTERFACE
+from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES
 
 
 class Transmission:
