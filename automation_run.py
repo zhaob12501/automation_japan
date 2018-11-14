@@ -9,13 +9,13 @@ from automation_transmission import Transmission
 from automation_undo import Undo
 from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
-from settings import POOL, sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
+from settings import sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
 
 
 class Run:
-    def __init__(self, req):
-        self.req = req
+    def __init__(self):
         self.data = 0
+        self.cli = ClientLogin()
         self.control = {
             '3': self.undo_run,
             '111': self.log_run,
@@ -30,94 +30,92 @@ class Run:
         self.LOG_INFO = self.auto.res_info
         self.DOWN_DATA = self.auto.down_data
 
+    # 登录--clientLogin
+    def cli_run(self):
+        if self.cli.run:
+            return 1
+        self.req_r = self.cli.req
+
     # 提交数据
     def log_run(self):
         print(self.LOG_DATA)
-        self.log = Login(self.req, self.LOG_DATA, self.auto)
+        self.log = Login(self.cli.req, self.LOG_DATA, self.auto)
         self.log.run
-        self.req = self.log.req
+        self.req_r = self.log.req
 
     # 上传xls文件
     def tra_run(self):
-        self.tra = Transmission(self.req, self.LOG_DATA, self.LOG_INFO, self.auto)
+        self.tra = Transmission(
+            self.cli.req, self.LOG_DATA, self.LOG_INFO, self.auto)
         self.tra.run
-        self.req = self.tra.req
+        self.req_r = self.tra.req
 
     def dow_run(self):
-        self.dow = Download(self.req, self.LOG_DATA, self.auto)
+        self.dow = Download(self.cli.req, self.LOG_DATA, self.auto)
+                            # self.DOWN_DATA, 
         self.dow.run
-        self.req = self.dow.req
+        self.req_r = self.dow.req
 
     def undo_run(self):
         print(self.LOG_DATA)
-        self.und = Undo(self.req, self.LOG_DATA, self.auto)
+        self.und = Undo(self.cli.req, self.LOG_DATA, self.auto)
         self.und.run
-        self.req = self.und.req
+        self.req_r = self.und.req
 
+    @property
     def run(self):
-        self.auto = AutomationPipelines()
-        self.auto.data()
+        if self.cli_run():
+            return
+        os.system('taskkill /F /IM chrome.exe')
+        # 开始执行
+        while True:
+            print('\nin Run...')
+            url = "http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/sqlWhere"
+            data = {
+                "name": "travel_business_list",
+                "where": "status=1 or status=2 or submit_status=3"
+            }
+            res = requests.post(url, data=data)
+            if res.json():
+                self.auto = AutomationPipelines()
+                self.auto.data()
+                # 数据处理
 
-        # 获取需要申请的人员信息
-        self.all_data()
-        self.control[self.status]()
+                # 判断是否需要申请
+                print('\n有数据进行提交\n')
 
+                # 获取需要申请的人员信息
+                self.all_data()
+                self.control[self.status]()
 
-def main():
-    cli = ClientLogin()
-    if cli.run:
-        return
-    req = cli.req
-    os.system('taskkill /F /IM chrome.exe')
+            else:
+                print('没有数据, 等待...')
+                if self.cli.refresh(self.req_r):
+                    break
+                print(strftime('%m/%d %H:%M:%S'))
 
-    # 开始执行
-    while True:
-        url = "http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/sqlWhere"
-        data = {
-            "name": "travel_business_list",
-            "where": "status=1 or status=2 or submit_status=3"
-        }
-        res = requests.post(url, data=data)
-        if res.json():
-            r = Run(req)
-            r.run()
-            req = r.req
-        else:
-            r = None
-            print('没有数据, 准备刷新...')
-            if cli.refresh(req):
-                print('刷新失败...退出...')
-                break
-            print('刷新成功...等待...')
-            print(strftime('%m/%d %H:%M:%S'))
-
-            path = BASE_DIR
-            try:
-                for infile in glob.glob(os.path.join(path, '*.pdf')):
+                for infile in glob.glob(os.path.join(BASE_DIR, '*.pdf')):
                     os.remove(infile)
-            except:
-                print('.pdf no del')
 
-            sleep(5)
-            continue
+                sleep(5)
+
 
 if __name__ == '__main__':
-    pool = POOL()
     while True:
         try:
             print('in automation_run')
-            # 登陆exe程序f
+            # 登陆exe程序
             open_client()
-
-            print('in getCookies')
-            for i in range(10):
+            for _ in range(10):
+                print('in getCookies')
                 if getCookies():
                     break
+                sleep(10)
             else:
                 continue
 
-            # 主程序
-            main()
+            r = Run()
+            r.run
         except Exception:
             print('automation_run 出现错误... 系统重启...')
             ERRINFO(name="系统重启", file="automation_run")

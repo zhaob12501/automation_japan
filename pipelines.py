@@ -5,7 +5,7 @@ from DBUtils.PooledDB import PooledDB
 import settings
 
 travel_names = None
-
+now_time = 0
 
 class Mysql(object):
     """
@@ -28,13 +28,12 @@ class Mysql(object):
         @summary: 静态方法，从连接池中取出连接
         @return MySQLdb.connection
         """
-        print(Mysql.__pool)
         if Mysql.__pool is None:
             Mysql.__pool = PooledDB(
                 creator=pymysql, mincached=1, maxcached=20,
                 host=settings.DBHOST, port=settings.DBPORT,
                 user=settings.DBUSER, passwd=settings.DBPWD,
-                db=settings.DBNAME, use_unicode=False,
+                db=settings.DBNAME, use_unicode=True,
                 charset=settings.DBCHAR  # , cursorclass=DictCursor
             )
         return Mysql.__pool.connection()
@@ -185,8 +184,10 @@ class Mysql(object):
 
 
 def get_travel_names():
+    global now_time
     global travel_names
-    if not travel_names:
+    if not travel_names or settings.time() - now_time > 7200:
+        now_time = settings.time()
         mysql = Mysql()
         sql = "SELECT tid FROM dc_business_travel_setting WHERE partners=%s"
         travel_names = mysql.getAll(sql, settings.DJ_NAME)
@@ -230,6 +231,7 @@ class AutomationPipelines(Mysql):
 
             if res_1[8] == '222':
                 self.update(tid=res_1[5], status='3')
+                return 0
 
             # 旅行社番号
             sql = f'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{res_1[0]}"'
@@ -280,7 +282,7 @@ class AutomationPipelines(Mysql):
             print(e, '\n人员信息查询失败！...')
 
         try:
-            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE' \
+            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE ' \
                 'tvisa_id = "{}"'.format(res_1[5])
             self.cur.execute(sql)
             res_info = self.cur.fetchall()
@@ -303,7 +305,6 @@ class AutomationPipelines(Mysql):
                 res[3] = res[3][:6]
                 res[4] = res[4].replace('-', '/').strip()
 
-                res = tuple(res)
                 res_info.append(res)
             self.res_info = res_info
 
@@ -377,7 +378,6 @@ class AutomationPipelines(Mysql):
                         upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
                     else:
                         upSql = f"UPDATE dc_travel_business_list SET status='{status}', update_time={int(settings.time())} WHERE tid={tid};"
-
                     self.cur.execute(upSql)
                 if pdf:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
@@ -398,10 +398,16 @@ class AutomationPipelines(Mysql):
             elif res[0] in [6, 7] and submit_status == '211':
                 upSql = f"UPDATE dc_travel_business_list SET status='6', submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
                 self.cur.execute(upSql)
-
             self.cur.close()
-            self.dispose()
+            self.end()
         except:
             print('数据库执行出错, 进行回滚...')
+            if not self.cur._closed:
+                self.cur.close()
+            self.end(0)
+
+    def __del__(self):
+        if not self.cur._closed:
             self.cur.close()
-            self.dispose(0)
+        if not self._conn._closed:
+            self.dispose()

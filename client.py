@@ -35,6 +35,7 @@ def open_client():
     m = PyMouse()
     m.click(10000, 10000)
     k = PyKeyboard()
+    sleep(2)
     subprocess.Popen(EXE_PWD)
     sleep(2)
     m.click(COORDINATES_1[0], COORDINATES_1[1])
