@@ -54,8 +54,8 @@ class Run:
         self.und.run
         self.req = self.und.req
 
-    def run(self, con):
-        self.auto = AutomationPipelines(con)
+    def run(self):
+        self.auto = AutomationPipelines()
         self.auto.data()
 
         # 获取需要申请的人员信息
@@ -80,8 +80,7 @@ def main():
         res = requests.post(url, data=data)
         if res.json():
             r = Run(req)
-            con = pool.connection()
-            r.run(con)
+            r.run()
             req = r.req
         else:
             r = None
