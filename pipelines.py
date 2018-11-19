@@ -1,6 +1,6 @@
 import pymysql
 import requests
-from DBUtils.PooledDB import PooledDB
+# from DBUtils.PooledDB import PooledDB
 
 import settings
 
@@ -20,23 +20,30 @@ class Mysql(object):
 
     def getConn(self):
         # 数据库构造函数，从连接池中取出连接，并生成操作游标
-        self._conn = Mysql.__getConn()
+        # self._conn = Mysql.__getConn()
+        self._conn = pymysql.connect(
+            host=settings.DBHOST, port=settings.DBPORT,
+            user=settings.DBUSER, passwd=settings.DBPWD,
+            db=settings.DBNAME, use_unicode=True,
+            charset=settings.DBCHAR  # , cursorclass=DictCursor
+        )
+        
 
-    @staticmethod
-    def __getConn():
-        """
-        @summary: 静态方法，从连接池中取出连接
-        @return MySQLdb.connection
-        """
-        if Mysql.__pool is None:
-            Mysql.__pool = PooledDB(
-                creator=pymysql, mincached=1, maxcached=20,
-                host=settings.DBHOST, port=settings.DBPORT,
-                user=settings.DBUSER, passwd=settings.DBPWD,
-                db=settings.DBNAME, use_unicode=True,
-                charset=settings.DBCHAR  # , cursorclass=DictCursor
-            )
-        return Mysql.__pool.connection()
+    # @staticmethod
+    # def __getConn():
+    #     """
+    #     @summary: 静态方法，从连接池中取出连接
+    #     @return MySQLdb.connection
+    #     """
+    #     if Mysql.__pool is None:
+    #         Mysql.__pool = PooledDB(
+    #             creator=pymysql, mincached=1, maxcached=20,
+    #             host=settings.DBHOST, port=settings.DBPORT,
+    #             user=settings.DBUSER, passwd=settings.DBPWD,
+    #             db=settings.DBNAME, use_unicode=True,
+    #             charset=settings.DBCHAR  # , cursorclass=DictCursor
+    #         )
+    #     return Mysql.__pool.connection()
 
     def getAll(self, sql, param=None):
         """
@@ -407,7 +414,7 @@ class AutomationPipelines(Mysql):
             self.end(0)
 
     def __del__(self):
-        if not self.cur._closed:
+        if hasattr(self, "cur"):
             self.cur.close()
-        if not self._conn._closed:
+        if hasattr(self, "_conn"):
             self.dispose()

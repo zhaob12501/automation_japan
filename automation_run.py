@@ -83,12 +83,11 @@ class Run:
                 # 获取需要申请的人员信息
                 self.all_data()
                 self.control[self.status]()
-
             else:
-                print('没有数据, 等待...')
+                self.auto = None
+                print('没有数据, 等待...', strftime('%m/%d %H:%M:%S'))
                 if self.cli.refresh(self.req):
                     break
-                print(strftime('%m/%d %H:%M:%S'))
 
                 for infile in glob.glob(os.path.join(BASE_DIR, '*.pdf')):
                     os.remove(infile)
