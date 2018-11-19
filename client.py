@@ -93,19 +93,13 @@ class ClientLogin:
     def refresh(self, req):
         res = req.get(self.top_url)
         if res.url == self.login_url:
-            for _ in range(5):
-                if self.login():
-                    break
-            else:
-                return 1
+            if self.login():
+                return 0
+            return 1
         return 0
 
     @property
     def run(self):
-        for _ in range(5):
-            if self.login():
-                break
-            sleep(10)
-        else:
-            return 1
-        return 0
+        if self.login():
+            return 0
+        return 1
