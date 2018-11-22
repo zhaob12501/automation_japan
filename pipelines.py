@@ -193,7 +193,7 @@ class Mysql(object):
 def get_travel_names():
     global now_time
     global travel_names
-    if not travel_names or settings.time() - now_time > 7200:
+    if not travel_names or settings.time() - now_time > 300:
         now_time = settings.time()
         mysql = Mysql()
         sql = "SELECT tid FROM dc_business_travel_setting WHERE partners=%s"
@@ -214,21 +214,21 @@ class AutomationPipelines(Mysql):
             Undo = True
 
             sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                f'WHERE submit_status=3 and travel_name in {get_travel_names()} and visa_type not like "%五年%"'
+                f'WHERE submit_status=3 and travel_name in {get_travel_names()} and visa_type'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
             if not res_1:
                 for status in [1, 2]:
                     # 查证类别 出入境时间
                     sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                        f'WHERE status = {status} and submit_status = 111 and travel_name in {get_travel_names()} and visa_type not like "%五年%"'
+                        f'WHERE status = {status} and submit_status = 111 and travel_name in {get_travel_names()} and visa_type'
                     self.cur.execute(sql)
                     res_1 = self.cur.fetchone()
                     if res_1:
                         break
                 else:
                     sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                        f'WHERE (status = 1 or status = 2) and travel_name in {get_travel_names()} and visa_type not like "%五年%"'
+                        f'WHERE (status = 1 or status = 2) and travel_name in {get_travel_names()} and visa_type'
                     self.cur.execute(sql)
                     res_1 = self.cur.fetchone()
                     Undo = False
@@ -239,7 +239,10 @@ class AutomationPipelines(Mysql):
             if res_1[8] == '222':
                 self.update(tid=res_1[5], status='3')
                 return 0
-
+            if "五年" in res_1[3]:
+                self.update(tid=res_1[5], status='5')
+                return 0
+                
             # 旅行社番号
             sql = f'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{res_1[0]}"'
             self.cur.execute(sql)
