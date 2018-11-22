@@ -170,6 +170,4 @@ class Transmission:
                     "automation_transmission", e)
             raise AutomationError(e, "automation_transmission")
         finally:
-            if hasattr(self, "auPipe"):
-                del self.auPipe
             return update_data

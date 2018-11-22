@@ -1,248 +1,66 @@
 import pymysql
 import requests
-# from DBUtils.PooledDB import PooledDB
 
-import settings
-
-travel_names = None
-now_time = 0
-
-class Mysql(object):
-    """
-    MYSQL数据库对象，负责产生数据库连接 , 此类中的连接采用连接池实现获取连接对象：conn = Mysql.getConn()
-            释放连接对象;conn.close()或del conn
-    """
-    # 连接池对象
-    __pool = None
-
-    def __init__(self):
-        self.getConn()
-
-    def getConn(self):
-        # 数据库构造函数，从连接池中取出连接，并生成操作游标
-        # self._conn = Mysql.__getConn()
-        self._conn = pymysql.connect(
-            host=settings.DBHOST, port=settings.DBPORT,
-            user=settings.DBUSER, passwd=settings.DBPWD,
-            db=settings.DBNAME, use_unicode=True,
-            charset=settings.DBCHAR  # , cursorclass=DictCursor
-        )
-        
-
-    # @staticmethod
-    # def __getConn():
-    #     """
-    #     @summary: 静态方法，从连接池中取出连接
-    #     @return MySQLdb.connection
-    #     """
-    #     if Mysql.__pool is None:
-    #         Mysql.__pool = PooledDB(
-    #             creator=pymysql, mincached=1, maxcached=20,
-    #             host=settings.DBHOST, port=settings.DBPORT,
-    #             user=settings.DBUSER, passwd=settings.DBPWD,
-    #             db=settings.DBNAME, use_unicode=True,
-    #             charset=settings.DBCHAR  # , cursorclass=DictCursor
-    #         )
-    #     return Mysql.__pool.connection()
-
-    def getAll(self, sql, param=None):
-        """
-        @summary: 执行查询，并取出所有结果集
-        @param sql:查询 sql ，如果有查询条件，请只指定条件列表，并将条件值使用参数[param]传递进来
-        @param param: 可选参数，条件列表值（元组/列表）
-        @return: result list(字典对象)/boolean 查询到的结果集
-        """
-        self._cursor = self._conn.cursor()
-        if param is None:
-            count = self._cursor.execute(sql)
-        else:
-            count = self._cursor.execute(sql, param)
-        if count > 0:
-            result = self._cursor.fetchall()
-        else:
-            result = False
-        self._cursor.close()
-        return result
-
-    def getOne(self, sql, param=None):
-        """
-        @summary: 执行查询，并取出第一条
-        @param sql:查询 sql ，如果有查询条件，请只指定条件列表，并将条件值使用参数[param]传递进来
-        @param param: 可选参数，条件列表值（元组/列表）
-        @return: result list/boolean 查询到的结果集
-        """
-        self._cursor = self._conn.cursor()
-        if param is None:
-            count = self._cursor.execute(sql)
-        else:
-            count = self._cursor.execute(sql, param)
-        if count > 0:
-            result = self._cursor.fetchone()
-        else:
-            result = False
-        self._cursor.close()
-        return result
-
-    def getMany(self, sql, num, param=None):
-        """
-        @summary: 执行查询，并取出num条结果
-        @param sql:查询 sql ，如果有查询条件，请只指定条件列表，并将条件值使用参数[param]传递进来
-        @param num:取得的结果条数
-        @param param: 可选参数，条件列表值（元组/列表）
-        @return: result list/boolean 查询到的结果集
-        """
-        self._cursor = self._conn.cursor()
-        if param is None:
-            count = self._cursor.execute(sql)
-        else:
-            count = self._cursor.execute(sql, param)
-        if count > 0:
-            result = self._cursor.fetchmany(num)
-        else:
-            result = False
-        self._cursor.close()
-        return result
-
-    def insertOne(self, sql, value):
-        """
-        @summary: 向数据表插入一条记录
-        @param sql:要插入的 sql 格式
-        @param value:要插入的记录数据tuple/list
-        @return: insertId 受影响的行数
-        """
-        self._cursor = self._conn.cursor()
-        self._cursor.execute(sql, value)
-        self._cursor.close()
-        return self.__getInsertId()
-
-    def insertMany(self, sql, values):
-        """
-        @summary: 向数据表插入多条记录
-        @param sql:要插入的 sql 格式
-        @param values:要插入的记录数据tuple(tuple)/list[list]
-        @return: count 受影响的行数
-        """
-        self._cursor = self._conn.cursor()
-        count = self._cursor.executemany(sql, values)
-        self._cursor.close()
-        return count
-
-    def __getInsertId(self):
-        """
-        获取当前连接最后一次插入操作生成的id,如果没有则为０
-        """
-        self._cursor = self._conn.cursor()
-        self._cursor.execute("SELECT @@IDENTITY AS id")
-        result = self._cursor.fetchall()
-        self._cursor.close()
-        return result[0]['id']
-
-    def __query(self, sql, param=None):
-        self._cursor = self._conn.cursor()
-        if param is None:
-            count = self._cursor.execute(sql)
-        else:
-            count = self._cursor.execute(sql, param)
-        self._cursor.close()
-        return count
-
-    def update(self, sql, param=None):
-        """
-        @summary: 更新数据表记录
-        @param sql:  sql 格式及条件，使用(%s,%s)
-        @param param: 要更新的  值 tuple/list
-        @return: count 受影响的行数
-        """
-        return self.__query(sql, param)
-
-    def delete(self, sql, param=None):
-        """
-        @summary: 删除数据表记录
-        @param sql:  sql 格式及条件，使用(%s,%s)
-        @param param: 要删除的条件 值 tuple/list
-        @return: count 受影响的行数
-        """
-        return self.__query(sql, param)
-
-    def begin(self):
-        """
-        @summary: 开启事务
-        """
-        self._conn.autocommit(0)
-
-    def end(self, option='commit'):
-        """
-        @summary: 结束事务
-        """
-        if option == 'commit':
-            self._conn.commit()
-        else:
-            self._conn.rollback()
-
-    def dispose(self, isEnd=1):
-        """
-        @summary: 释放连接池资源
-        """
-        if isEnd == 1:
-            self.end('commit')
-        else:
-            self.end('rollback')
-        self._conn.close()
+from settings import DJ_NAME, time, COMES, DBHOST, DBPORT, DBUSER, DBPWD, DBNAME, DBCHAR
 
 
-def get_travel_names():
-    global now_time
-    global travel_names
-    if not travel_names or settings.time() - now_time > 300:
-        now_time = settings.time()
-        mysql = Mysql()
-        sql = "SELECT tid FROM dc_business_travel_setting WHERE partners=%s"
-        travel_names = mysql.getAll(sql, settings.DJ_NAME)
-        travel_names = tuple([i[0] for i in travel_names] + [0, 0])
-        mysql.dispose()
-    return travel_names
-
-
-class AutomationPipelines(Mysql):
+class AutomationPipelines:
     '''数据库查询类
     '''
 
+    __pool = None
+
+    def __init__(self):
+        # print('in AutomationPipelines...')
+        self.con = self._conn = pymysql.connect(
+            host=DBHOST, port=DBPORT,
+            user=DBUSER, passwd=DBPWD,
+            db=DBNAME, use_unicode=True,
+            charset=DBCHAR)
+        self.cur = self.con.cursor()
+        # print('连接成功...')
+
     def data(self):
-        self.cur = self._conn.cursor()
         try:
             print('正在查询数据...')
+            # 符合条件的旅行社
+            sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
+            self.cur.execute(sql)
+            self.travel_name = self.cur.fetchall()
+            self.travel_name = tuple([i[0] for i in self.travel_name] + [0, 0])
             Undo = True
 
-            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                f'WHERE submit_status=3 and travel_name in {get_travel_names()} and visa_type'
+            sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                WHERE submit_status = 3 and travel_name in {self.travel_name}'
             self.cur.execute(sql)
             res_1 = self.cur.fetchone()
             if not res_1:
                 for status in [1, 2]:
                     # 查证类别 出入境时间
-                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                        f'WHERE status = {status} and submit_status = 111 and travel_name in {get_travel_names()} and visa_type'
+                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                    WHERE status = {status} and submit_status = 111 and travel_name in {self.travel_name}'
                     self.cur.execute(sql)
                     res_1 = self.cur.fetchone()
                     if res_1:
                         break
                 else:
-                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list ' \
-                        f'WHERE (status = 1 or status = 2) and travel_name in {get_travel_names()} and visa_type'
+                    sql = f'SELECT travel_name, japan_entry_time, japan_exit_time, visa_type, exit_flight, tid, repatriation_pdf, ques, submit_status FROM dc_travel_business_list \
+                    WHERE (status = 1 or status = 2) and travel_name in {self.travel_name}'
                     self.cur.execute(sql)
                     res_1 = self.cur.fetchone()
                     Undo = False
             if not res_1:
                 print('无需要提交数据')
                 return 0
+            self.tid = res_1[5]
+            if "五年" in res_1[3]:
+                self.update(tid=self.tid, status='5')
+                return 0
 
             if res_1[8] == '222':
-                self.update(tid=res_1[5], status='3')
+                self.update(tid=self.tid, status='3')
                 return 0
-            if "五年" in res_1[3]:
-                self.update(tid=res_1[5], status='5')
-                return 0
-                
+
             # 旅行社番号
             sql = f'SELECT travel_number, undertaker, calluser, calluser_phone, fex FROM dc_business_travel_setting WHERE tid = "{res_1[0]}"'
             self.cur.execute(sql)
@@ -251,7 +69,7 @@ class AutomationPipelines(Mysql):
                 print('res_2 未查到数据')
                 return 0
             # 姓名，英文名 人数
-            sql = f'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{res_1[5]}"'
+            sql = f'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{self.tid}"'
             self.cur.execute(sql)
             res_3 = self.cur.fetchone()
             if res_1 == ():
@@ -292,8 +110,8 @@ class AutomationPipelines(Mysql):
             print(e, '\n人员信息查询失败！...')
 
         try:
-            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE ' \
-                'tvisa_id = "{}"'.format(res_1[5])
+            sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, company_position FROM dc_travel_business_userinfo WHERE \
+             tvisa_id = "{}"'.format(self.tid)
             self.cur.execute(sql)
             res_info = self.cur.fetchall()
             if res_info == ():
@@ -315,10 +133,11 @@ class AutomationPipelines(Mysql):
                 res[3] = res[3][:6]
                 res[4] = res[4].replace('-', '/').strip()
 
+                res = tuple(res)
                 res_info.append(res)
             self.res_info = res_info
 
-            if '团' not in res_1[3] and self.log_data[0] not in settings.COMES:
+            if '团' not in res_1[3] and self.log_data[0] not in COMES:
                 self.down_data = ()
                 return 1
 
@@ -345,7 +164,6 @@ class AutomationPipelines(Mysql):
             print('归国报告数据查询失败！')
             print(e, '归国报告数据查询失败！...')
 
-        self.cur.close()
         return 1
 
     def update(self, tid='', status='', submit_status='', pdf=''):
@@ -371,11 +189,9 @@ class AutomationPipelines(Mysql):
             }
 
             status = 8, 9, 2, 3 --> {
-                status = status 『3 --> update_time = int(settings.time())』
+                status = status 『3 --> update_time = int(time())』
             }
         '''
-        self.cur = self._conn.cursor()
-
         sql = f"SELECT status, submit_status, repatriation_pdf FROM dc_travel_business_list where tid = {tid}"
         self.cur.execute(sql)
         res = self.cur.fetchone()
@@ -387,7 +203,8 @@ class AutomationPipelines(Mysql):
                     if str(status) != '3':
                         upSql = f"UPDATE dc_travel_business_list SET status='{status}' WHERE tid={tid};"
                     else:
-                        upSql = f"UPDATE dc_travel_business_list SET status='{status}', update_time={int(settings.time())} WHERE tid={tid};"
+                        upSql = f"UPDATE dc_travel_business_list SET status='{status}', update_time={int(time())} WHERE tid={tid};"
+
                     self.cur.execute(upSql)
                 if pdf:
                     upSql = f"UPDATE dc_travel_business_list SET repatriation_pdf='{pdf}' WHERE tid={tid};"
@@ -408,16 +225,16 @@ class AutomationPipelines(Mysql):
             elif res[0] in [6, 7] and submit_status == '211':
                 upSql = f"UPDATE dc_travel_business_list SET status='6', submit_status='3', repatriation_pdf='{pdf}' WHERE tid={tid};"
                 self.cur.execute(upSql)
-            self.cur.close()
-            self.end()
+
+            self.con.commit()
         except:
             print('数据库执行出错, 进行回滚...')
-            if not self.cur._closed:
-                self.cur.close()
-            self.end(0)
+            self.con.rollback()
 
     def __del__(self):
+        # print('\n数据库正在关闭连接')
         if hasattr(self, "cur"):
             self.cur.close()
-        if hasattr(self, "_conn"):
-            self.dispose()
+        if hasattr(self, "con"):
+            self.con.close()
+        # print('数据库已关闭连接\n')

@@ -11,6 +11,8 @@ from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
 from settings import sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
 
+reboot = 6
+
 
 class Run:
     def __init__(self):
@@ -62,9 +64,10 @@ class Run:
 
     @property
     def run(self):
+        global reboot
         if self.cli_run():
             return
-        os.system('taskkill /F /IM chrome.exe')
+        
         # 开始执行
         while True:
             print('\nin Run...')
@@ -73,10 +76,13 @@ class Run:
                 "name": "travel_business_list",
                 "where": "status=1 or status=2 or submit_status=3"
             }
-            res = requests.post(url, data=data)
+            try:
+                res = requests.post(url, data=data, timeout=5)
+            except:
+                continue
             if res.json():
                 self.auto = AutomationPipelines()
-                self.auto.data()
+                if not self.auto.data(): break
                 # 数据处理
                 print('\n有数据进行提交\n')
 
@@ -88,7 +94,7 @@ class Run:
                 print('没有数据, 等待...', strftime('%m/%d %H:%M:%S'))
                 if self.cli.refresh(self.req):
                     break
-
+                reboot = 6
                 for infile in glob.glob(os.path.join(BASE_DIR, '*.pdf')):
                     os.remove(infile)
 
@@ -96,24 +102,20 @@ class Run:
 
 
 if __name__ == '__main__':
+    # 登陆exe程序
+    open_client()
+    os.system('taskkill /F /IM chrome.exe')
     while True:
         try:
             print('in automation_run')
-            # 登陆exe程序
-            open_client()
-            for _ in range(10):
-                print('in getCookies')
-                if getCookies():
-                    break
-                sleep(10)
-            else:
-                continue
-
             r = Run()
             r.run
-        except Exception:
+        except:
+            reboot -= 1
+            if not reboot:
+                os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
+                # 登陆exe程序
+                open_client()
+                os.system('taskkill /F /IM chrome.exe')
             print('automation_run 出现错误... 系统重启...')
             ERRINFO(name="系统重启", file="automation_run")
-        finally:
-            os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
-            os.system('taskkill /f /im chrome.exe')

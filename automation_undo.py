@@ -130,5 +130,4 @@ class Undo:
             print('automation_undo 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_undo", e)
             raise AutomationError(e, "automation_undo")
-        finally:
-            del self.auPipe
+
