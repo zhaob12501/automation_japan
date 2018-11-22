@@ -190,9 +190,4 @@ class Download:
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_download", e)
             raise AutomationError(e, "automation_download")
-        finally:
-            try:
-                del self.auPipe
-            except:
-                pass
         sleep(1)

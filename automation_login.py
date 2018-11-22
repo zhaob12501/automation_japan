@@ -362,6 +362,4 @@ class Login:
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_login", e)
             raise AutomationError(e, "automation_login")
         finally:
-            if hasattr(self, "auPipe"):
-                del self.auPipe
             return update_data
