@@ -11,7 +11,7 @@ from client import ClientLogin, getCookies, open_client
 from pipelines import AutomationPipelines
 from settings import sleep, strftime, BASE_DIR, ERRINFO, AutomationError, TIM
 
-reboot = 6
+reboot = 3
 
 
 class Run:
@@ -47,7 +47,8 @@ class Run:
 
     # 上传xls文件
     def tra_run(self):
-        self.tra = Transmission(self.req, self.LOG_DATA, self.LOG_INFO, self.auto)
+        self.tra = Transmission(self.req, self.LOG_DATA,
+                                self.LOG_INFO, self.auto)
         self.tra.run
         self.req = self.tra.req
 
@@ -66,23 +67,25 @@ class Run:
     def run(self):
         global reboot
         if self.cli_run():
-            return
-        
+            return -1
+
         # 开始执行
         while True:
+            if strftime("%H") == "04":
+                sleep(60*61)
+                reboot = 1
+                break
             print('\nin Run...')
             url = "http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/sqlWhere"
             data = {
                 "name": "travel_business_list",
                 "where": "status=1 or status=2 or submit_status=3"
             }
-            try:
-                res = requests.post(url, data=data, timeout=5)
-            except:
-                continue
+            res = requests.post(url, data=data, timeout=5)
             if res.json():
                 self.auto = AutomationPipelines()
-                if not self.auto.data(): break
+                if not self.auto.data():
+                    break
                 # 数据处理
                 print('\n有数据进行提交\n')
 
@@ -94,28 +97,30 @@ class Run:
                 print('没有数据, 等待...', strftime('%m/%d %H:%M:%S'))
                 if self.cli.refresh(self.req):
                     break
-                reboot = 6
+                reboot = 3
                 for infile in glob.glob(os.path.join(BASE_DIR, '*.pdf')):
                     os.remove(infile)
 
                 sleep(5)
 
 
-if __name__ == '__main__':
+def client():
+    os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
     # 登陆exe程序
     open_client()
     os.system('taskkill /F /IM chrome.exe')
+
+if __name__ == '__main__':
+    client()
     while True:
         try:
             print('in automation_run')
             r = Run()
-            r.run
+            if r.run == -1:
+                client()
         except:
             reboot -= 1
             if not reboot:
-                os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
-                # 登陆exe程序
-                open_client()
-                os.system('taskkill /F /IM chrome.exe')
+                client()
             print('automation_run 出现错误... 系统重启...')
             ERRINFO(name="系统重启", file="automation_run")
