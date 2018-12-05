@@ -16,7 +16,11 @@ class AutomationPipelines:
             host=DBHOST, port=DBPORT,
             user=DBUSER, passwd=DBPWD,
             db=DBNAME, use_unicode=True,
-            charset=DBCHAR)
+            charset=DBCHAR,
+            connect_timeout=5,
+            read_timeout=5,
+            write_timeout=5,
+        )
         self.cur = self.con.cursor()
         # print('连接成功...')
 

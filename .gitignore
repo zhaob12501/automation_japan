@@ -31,3 +31,4 @@ Base.py
 *.1.py
 setAirports.py
 .history
+test*
