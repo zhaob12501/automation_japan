@@ -60,7 +60,7 @@ class Undo:
                     '<tr class="', 1)[1].split('"', 1)[0][-7:]
                 print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
 
-            except:
+            except Exception:
                 try:
                     for i in range(1, 31):
                         ne = f'?p={i}&s=1&d=2'
@@ -74,19 +74,21 @@ class Undo:
                             print(f'检索成功, id: {self.identity_id}!执行撤回操作!')
                             self.get_url = url
                             break
-                        except:
+                        except Exception:
                             continue
                     else:
-                        self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
-                        return 
-                except:
-                    self.auPipe.update(tid=self.LOG_DATA[7], submit_status='111')
+                        self.auPipe.update(
+                            tid=self.LOG_DATA[7], submit_status='111')
+                        return
+                except Exception:
+                    self.auPipe.update(
+                        tid=self.LOG_DATA[7], submit_status='111')
         if not self.identity_id:
             self.auPipe.update(self.LOG_DATA[7], submit_status="111", pdf="")
         self.identity_id = self.identity_id[0]
-            
 
     # 2、执行撤销操作
+
     def undo(self):
         data = {
             'IDENTITY_ID': self.identity_id,
@@ -130,4 +132,3 @@ class Undo:
             print('automation_undo 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1], "automation_undo", e)
             raise AutomationError(e, "automation_undo")
-

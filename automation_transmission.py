@@ -6,7 +6,7 @@ import requests
 
 import client
 import create_xls
-from settings import os, AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES
+from settings import AutomationError, VISA, BASE_DIR, ERRINFO, sleep, strftime, LOG_DIR, DAY, COMES
 
 
 class Transmission:
@@ -62,7 +62,7 @@ class Transmission:
                 print('The Transmission first step to success!')
                 print(self.identity_id)
 
-            except:
+            except Exception:
                 for i in range(1, 21):
                     ne = '?p={}&s=1&d=2'.format(i)
                     url = self.identity_list_url + ne
@@ -75,7 +75,7 @@ class Transmission:
                         print('The Transmission first step to success!')
                         self.get_url = url
                         break
-                    except:
+                    except Exception:
                         continue
                 else:
                     print(
@@ -122,27 +122,33 @@ class Transmission:
             if "errorMsg" in res.text:
                 update_data = {"tid": self.LOG_DATA[7], "status": '9'}
                 self.auPipe.update(tid=self.LOG_DATA[7], status='9')
-                errorMsg = res.text.split('<p class="errorMsg">')[1].split('</p>')[0]
+                errorMsg = res.text.split('<p class="errorMsg">')[
+                    1].split('</p>')[0]
                 print(errorMsg)
-                ERRINFO(self.LOG_DATA[7],self.LOG_DATA[1], "errorMsg", errorMsg)
+                ERRINFO(self.LOG_DATA[7],
+                        self.LOG_DATA[1], "errorMsg", errorMsg)
             return update_data
         print('-' * 20, '\nThe Transmission fourth step is successful\n', '-' * 20)
         print('\tFile upload successful!')
         print('\n===xls文件上传完成OK===\n\n')
         if '团体' not in self.LOG_DATA[6] and self.LOG_DATA[0] not in COMES:
-            update_data = {"tid": self.LOG_DATA[7], "status": '3', "submit_status": '222', "pdf": self.FH}
-            self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222', pdf=self.FH)
+            update_data = {
+                "tid": self.LOG_DATA[7], "status": '3', "submit_status": '222', "pdf": self.FH}
+            self.auPipe.update(
+                tid=self.LOG_DATA[7], status='3', submit_status='222', pdf=self.FH)
             print('提交完成！\n========\n', sep='\n')
         else:
-            update_data = {"tid": self.LOG_DATA[7], "submit_status": '221', "pdf": self.FH}
-            self.auPipe.update(tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
+            update_data = {
+                "tid": self.LOG_DATA[7], "submit_status": '221', "pdf": self.FH}
+            self.auPipe.update(
+                tid=self.LOG_DATA[7], submit_status='221', pdf=self.FH)
         try:
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
                 log = {'xls提交': self.LOG_INFO,
-                        'time': strftime('%m/%d %H:%M:%S')}
+                       'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
-        except:
+        except Exception:
             pass
         return update_data
 

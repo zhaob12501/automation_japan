@@ -61,8 +61,7 @@ class Login:
         print(page_key)
         if len(page_key) == 0:
             raise AutomationError("_PAGE_KEY 没有")
-        
-        self._PAGE_KEY = page_key[0] 
+        self._PAGE_KEY = page_key[0]
 
         print('in Login top data')
         # 指定番号
@@ -81,7 +80,7 @@ class Login:
                   '公司名(会社名)：\n\t{2}\n管辖公馆(管轄公館)：\n\t{3}'
                   ''.format(self.res_info['COMPANY_CODE'], self.res_info['CHINA_AGENT_ID'],
                             self.res_info['COMPANY_NAME'], self.res_info['DIPLOMAT_NAME']))
-        except:
+        except Exception:
             raise AutomationError('未检测到番号')
 
     # 第四步 填写信息并确认
@@ -119,11 +118,15 @@ class Login:
             except Exception as e:
                 print(e)
             if self.LOG_DATA[9] is None or self.LOG_DATA[9] == self.LOG_DATA[3]:
-                update_data = {"tid": self.LOG_DATA[7], "submit_status": '211', "pdf": self.FH}
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
+                update_data = {
+                    "tid": self.LOG_DATA[7], "submit_status": '211', "pdf": self.FH}
+                self.auPipe.update(
+                    tid=self.LOG_DATA[7], submit_status='211', pdf=self.FH)
             else:
-                update_data = {"tid": self.LOG_DATA[7], "submit_status": '222', "pdf": self.FH}
-                self.auPipe.update(tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
+                update_data = {
+                    "tid": self.LOG_DATA[7], "submit_status": '222', "pdf": self.FH}
+                self.auPipe.update(
+                    tid=self.LOG_DATA[7], submit_status='222', pdf=self.FH)
         else:
             if res.url == self.login_url:
                 raise AutomationError('登陆失效, 重新登陆...')
@@ -136,9 +139,9 @@ class Login:
                        'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
-        except:
+        except Exception:
             pass
-        
+
         return update_data
 
     # 验证数据

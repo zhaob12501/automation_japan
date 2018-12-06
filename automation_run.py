@@ -114,7 +114,7 @@ if __name__ == '__main__':
             r = Run()
             if r.run == -1:
                 client()
-        except:
+        except Exception:
             reboot -= 1
             if not reboot:
                 client()

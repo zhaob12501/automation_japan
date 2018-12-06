@@ -12,10 +12,10 @@ from settings import sleep, EXE_PWD, PASSWD_EXE, COORDINATES_1, COORDINATES_2, L
 
 
 def getCookies():
-    conn = sqlite3.connect(getenv("LOCALAPPDATA") +
-                           "\\Google\\Chrome\\User Data\\Default\\Cookies")
+    conn = sqlite3.connect(
+        getenv("LOCALAPPDATA") + "\\Google\\Chrome\\User Data\\Default\\Cookies")
     cursor = conn.cursor()
-    #cursor.execute('select host_key,name,encrypted_value from cookies where host_key like "%test%"')
+    # cursor.execute('select host_key,name,encrypted_value from cookies where host_key like "%test%"')
     cursor.execute(
         'select host_key,name,encrypted_value from cookies where host_key like "churenkyosystem.com"')
     cookies = {}
@@ -57,12 +57,13 @@ class ClientLogin:
         co = _cookies
         try:
             co.pop('PHPSESSID')
-        except:
+        except Exception:
             pass
         requests.utils.add_dict_to_cookiejar(self.req.cookies, co)
 
         self.req.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+            ' Chrome/66.0.3359.181 Safari/537.36',
         }
         # 登录1
         # self.log_url = 'https://churenkyosystem.com/securemagic/login.php'
