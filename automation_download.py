@@ -56,7 +56,7 @@ class Download:
                 print('The Download first step to success!')
                 print(self.identity_id)
 
-            except:
+            except Exception:
                 for i in range(1, 21):
                     ne = '?p={}&s=1&d=2'.format(i)
                     url = self.identity_list_url + ne
@@ -69,7 +69,7 @@ class Download:
                         print('The Download first step to success!')
                         self.get_url = url
                         break
-                    except:
+                    except Exception:
                         continue
                 else:
                     print(
@@ -153,7 +153,7 @@ class Download:
         res = self.req.get(url)
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
-        file = {self.SLFH: res.content}
+        file = {"file": res.content}
 
         data = {'tid': f'{self.LOG_DATA[7]}'}
         res = requests.post(INTERFACE, data=data, files=file)

@@ -8,8 +8,6 @@ class AutomationPipelines:
     '''数据库查询类
     '''
 
-    __pool = None
-
     def __init__(self):
         # print('in AutomationPipelines...')
         self.con = self._conn = pymysql.connect(
