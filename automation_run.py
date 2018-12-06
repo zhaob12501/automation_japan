@@ -71,10 +71,6 @@ class Run:
 
         # 开始执行
         while True:
-            if strftime("%H") == "04":
-                sleep(60*61)
-                reboot = 1
-                break
             print('\nin Run...')
             url = "http://www.mobtop.com.cn/index.php?s=/Api/MalaysiaApi/sqlWhere"
             data = {
