@@ -101,10 +101,11 @@ class Run:
 
 
 def client():
-    os.system('taskkill /f /im SecureMagicWindowsClient_1.3.1.exe')
+    os.system('taskkill /F /IM SecureMagicWindowsClient_1.3.1.exe')
     # 登陆exe程序
     open_client()
     os.system('taskkill /F /IM chrome.exe')
+
 
 if __name__ == '__main__':
     client()

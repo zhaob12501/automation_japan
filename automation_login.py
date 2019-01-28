@@ -159,177 +159,235 @@ class Login:
             "ARRIVAL_DATE": self. LOG_DATA[4],
             "DEPARTURE_DATE": self.LOG_DATA[5],
 
-
-
             "_PAGE_KEY": self._PAGE_KEY,
             "BTN_CHECK_x": "確 認"
         }
         print('-------------------------')
+        """
+            三年多次:
+            青森 "VISA_STAY_PREF_2": "2"
+            岩手 "VISA_STAY_PREF_3": "3"
+            宫城 "VISA_STAY_PREF_4": "4"
+            秋田 "VISA_STAY_PREF_4": "5"
+            山形 "VISA_STAY_PREF_6": "6"
+            福岛 "VISA_STAY_PREF_7": "7"
+        """
         info = {
-            '单次签证': 1,
-            '三年多次签证': 10,
-            '团体查证': 2,
-            '冲绳三年签证': 3,
-            '东北六县三年（青森）': 4,
-            '东北六县三年（秋田）': 7,
-            '东北六县三年（山形）': 8,
-            '东北六县三年（岩手）': 5,
-            '东北六县三年（宫城）': 6,
-            '东北六县三年（福岛）': 9,
-            '冲绳单次签证': 1,
-            '东三县1三年': 6,
-            '单次30': 1,
-            '东北地区1': 1,
-            '东北地区2': 12,
-            '东北2A三年': 11,
-            '东北2B三年': 13,
-            '东北2C三年': 14,
-            '东北2D三年': 14,
-            '东三县2三年': 7,
-            '冲绳东北六县多次': 10,
-            '冲绳东北六县单次': 1,
-            '东三县1单次': 1,
-            '东三县2单次': 1,
-            '东北六县单次（福岛）': 1,
-            '东北六县单次（宫城）': 1,
-            '东北六县单次（岩手）': 1,
-            '东北六县单次（山形）': 1,
-            '东北六县单次（秋田）': 1,
-            '东北六县单次（青森）': 1,
-            '普通，单次': 1,
-            '足够经济能力人士，三年数次': 10,
-            '宫城，单次': 1,
-            '福岛，单次': 1,
-            '岩手，单次': 1,
-            '青森，单次': 1,
-            '秋田，单次': 1,
-            '山形，单次': 1,
-            '宫城，三年数次': 6,
-            '福岛，三年数次': 9,
-            '岩手，三年数次': 5,
-            '青森，三年数次': 4,
-            '秋田，三年数次': 7,
-            '山形，三年数次': 8,
-            '冲绳，单次': 1,
-            '冲绳，三年数次': 3,
+            "单次签证": 1,
+            "三年多次签证": 10,
+            "团体查证": 2,
+            "冲绳三年签证": 3,
+            "东北六县三年（青森）": 4,
+            "东北六县三年（秋田）": 7,
+            "东北六县三年（山形）": 8,
+            "东北六县三年（岩手）": 5,
+            "东北六县三年（宫城）": 6,
+            "东北六县三年（福岛）": 9,
+            "冲绳单次签证": 1,
+            "东三县1三年": 6,
+            "单次30": 1,
+            "东北地区1": 1,
+            "东北地区2": 12,
+            "东北2A三年": 11,
+            "东北2B三年": 13,
+            "东北2C三年": 14,
+            "东北2D三年": 14,
+            "东三县2三年": 7,
+            "冲绳东北六县多次": 10,
+            "冲绳东北六县单次": 1,
+            "东三县1单次": 1,
+            "东三县2单次": 1,
+            "东北六县单次（福岛）": 1,
+            "东北六县单次（宫城）": 1,
+            "东北六县单次（岩手）": 1,
+            "东北六县单次（山形）": 1,
+            "东北六县单次（秋田）": 1,
+            "东北六县单次（青森）": 1,
+            "普通，单次": 1,
+            "足够经济能力人士，三年数次": 10,
+            "宫城，单次": 1,
+            "福岛，单次": 1,
+            "岩手，单次": 1,
+            "青森，单次": 1,
+            "秋田，单次": 1,
+            "山形，单次": 1,
+            "宫城，三年数次": 6,
+            "福岛，三年数次": 9,
+            "岩手，三年数次": 5,
+            "青森，三年数次": 4,
+            "秋田，三年数次": 7,
+            "山形，三年数次": 8,
+            "冲绳，单次": 1,
+            "冲绳，三年数次": 3,
+            "冲绳东北六县多次（岩手、秋田、山形）": 16,
+            "冲绳东北六县多次（福岛、宫城、青森）": 17,
         }
 
         add_info = info[self.LOG_DATA[6]]
         print(add_info)
         if add_info is 1:
-            data["VISA_TYPE"] = '2'
-            data["VISA_TYPE_1"] = '2'
-            data["VISA_TYPE_2"] = '4'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "2",
+                "VISA_TYPE_1": "2",
+                "VISA_TYPE_2": "4",
+                "VISA_VISIT_TYPE": "0"
+            })
         elif add_info is 2:
-            data["VISA_TYPE"] = '1'
-            data["VISA_TYPE_1"] = '1'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "1",
+                "VISA_TYPE_1": "1",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 3:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_47"] = '47'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_47": "47",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 4:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_2"] = '2'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 5:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_3"] = '3'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_3": "3",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 6:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_4"] = '4'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_4": "4",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 7:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_4"] = '5'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_5": '5',
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 8:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_6"] = '6'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_6": '6',
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 9:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_7"] = '7'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_7": '7',
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 10:
-            data["VISA_TYPE"] = '4'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '4'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "4",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "4",
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 11:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_2"] = '2'
-            data["VISA_STAY_PREF_4"] = '5'
-            data["VISA_STAY_PREF_6"] = '6'
-            data["VISA_VISIT_TYPE"] = "0"
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_STAY_PREF_5": '5',
+                "VISA_STAY_PREF_6": '6',
+                "VISA_VISIT_TYPE": "0",
+            })
         elif add_info is 12:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_3"] = '3'
-            data["VISA_STAY_PREF_4"] = '4'
-            data["VISA_STAY_PREF_7"] = '7'
-            data["VISA_VISIT_TYPE"] = '1'
-            data["VISA_VISIT_PREF_3"] = '3'
-            data["VISA_VISIT_PREF_4"] = '4'
-            data["VISA_VISIT_PREF_7"] = '7'
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_3": "3",
+                "VISA_STAY_PREF_4": "4",
+                "VISA_STAY_PREF_7": '7',
+                "VISA_VISIT_TYPE": "1",
+                "VISA_VISIT_PREF_3": "3",
+                "VISA_VISIT_PREF_4": "4",
+                "VISA_VISIT_PREF_7": '7',
+            })
         elif add_info is 13:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_2"] = '2'
-            data["VISA_STAY_PREF_3"] = '3'
-            data["VISA_STAY_PREF_4"] = '4'
-            data["VISA_STAY_PREF_4"] = '5'
-            data["VISA_STAY_PREF_6"] = '6'
-            data["VISA_STAY_PREF_7"] = '7'
-            data["VISA_VISIT_TYPE"] = '1'
-            data["VISA_VISIT_PREF_3"] = '3'
-            data["VISA_VISIT_PREF_4"] = '4'
-            data["VISA_VISIT_PREF_7"] = '7'
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_STAY_PREF_3": "3",
+                "VISA_STAY_PREF_4": "4",
+                "VISA_STAY_PREF_5": '5',
+                "VISA_STAY_PREF_6": '6',
+                "VISA_STAY_PREF_7": '7',
+                "VISA_VISIT_TYPE": "1",
+                "VISA_VISIT_PREF_3": "3",
+                "VISA_VISIT_PREF_4": "4",
+                "VISA_VISIT_PREF_7": '7',
+            })
         elif add_info is 14:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_47"] = '47'
-            data["VISA_STAY_PREF_2"] = '2'
-            data["VISA_STAY_PREF_4"] = '5'
-            data["VISA_STAY_PREF_6"] = '6'
-            data["VISA_VISIT_TYPE"] = '0'
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_47": "47",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_STAY_PREF_5": '5',
+                "VISA_STAY_PREF_6": '6',
+                "VISA_VISIT_TYPE": '0',
+            })
         elif add_info is 15:
-            data["VISA_TYPE"] = '3'
-            data["VISA_TYPE_1"] = 'N'
-            data["VISA_TYPE_2"] = '3'
-            data["VISA_STAY_PREF_47"] = '47'
-            data["VISA_STAY_PREF_2"] = '2'
-            data["VISA_STAY_PREF_3"] = '3'
-            data["VISA_STAY_PREF_4"] = '4'
-            data["VISA_STAY_PREF_4"] = '5'
-            data["VISA_STAY_PREF_6"] = '6'
-            data["VISA_STAY_PREF_7"] = '7'
-            data["VISA_VISIT_TYPE"] = '1'
-            data["VISA_VISIT_PREF_3"] = '3'
-            data["VISA_VISIT_PREF_4"] = '4'
-            data["VISA_VISIT_PREF_7"] = '7'
-
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_47": "47",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_STAY_PREF_3": "3",
+                "VISA_STAY_PREF_4": "4",
+                "VISA_STAY_PREF_5": '5',
+                "VISA_STAY_PREF_6": '6',
+                "VISA_STAY_PREF_7": '7',
+                "VISA_VISIT_TYPE": "1",
+                "VISA_VISIT_PREF_3": "3",
+                "VISA_VISIT_PREF_4": "4",
+                "VISA_VISIT_PREF_7": '7',
+            })
+        elif add_info is 16:
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_3": "3",
+                "VISA_STAY_PREF_5": "5",
+                "VISA_STAY_PREF_6": "6",
+                "VISA_VISIT_TYPE": "0",
+            })
+        elif add_info is 17:
+            data.update({
+                "VISA_TYPE": "3",
+                "VISA_TYPE_1": "N",
+                "VISA_TYPE_2": "3",
+                "VISA_STAY_PREF_2": "2",
+                "VISA_STAY_PREF_4": "4",
+                "VISA_STAY_PREF_7": "7",
+                "VISA_VISIT_TYPE": "0",
+            })
         return data
 
     @property
