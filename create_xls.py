@@ -23,5 +23,5 @@ def cre_xls(LGO_INFO):
             worksheet.write(i, j, label=data[i][j])
 
     workbook.save(BASE_DIR + f'\\{VISA}.xls')
-    print('xls文件准备完成!...')
+    # print('xls文件准备完成!...')
     return 0

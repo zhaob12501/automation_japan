@@ -37,9 +37,29 @@ $ pyinstaller -F -i abc.ico automation_run.py automation_login.py automation_tra
 # 无小黑框
 $ pyinstaller -F -w -i abc.ico automation_run.py automation_login.py automation_transmission.py automation_download.py automation_undo.py create_xls.py client.py pipelines.py settings.py
 ```
+```
+"""
+	三年多次:
+	青森 "VISA_STAY_PREF_2": "2"
+	岩手 "VISA_STAY_PREF_3": "3"
+	宫城 "VISA_STAY_PREF_4": "4"
+	秋田 "VISA_STAY_PREF_4": "5"
+	山形 "VISA_STAY_PREF_6": "6"
+	福岛 "VISA_STAY_PREF_7": "7"
+"""
+    # def validation(self):
+        # # print('in Login validation')
+        # res = self.req.get(
+        #     'https://churenkyosystem.com/member/identity_list.php')
+        # if self.info in res.text:
+        #     invalid = res.text.split(self.info)[0].split(
+        #         '<a href="identity_info.php?IDENTITY_ID')[-1]
+        #     if '発行済' in invalid:
+        #         self.auPipe.update(tid=self.LOG_DATA[7], submit_status='211')
+        #         return 0
+        # return 1
 
-
-
+```
 
 
 ## 遇到并解决的问题:

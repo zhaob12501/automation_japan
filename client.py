@@ -24,8 +24,8 @@ def getCookies():
             result[2], None, None, None, 0)[1]
         if value != b'""':
             cookies[result[1]] = value.decode('utf8')
-        elif not value:
-            print("no password found")
+        # elif not value:
+            # print("no password found")
     cursor.close()
     return cookies
 
@@ -83,7 +83,7 @@ class ClientLogin:
             'PASSWORD': PASSWORD,
             'SUBMIT_LOGIN_x': 'ログイン'
         }
-        print('正在传输,请耐心等待...')
+        # print('正在传输,请耐心等待...')
         # sleep(5)
         res = self.req.post(self.login_url, data=from_data)
         if res.url == self.top_url:

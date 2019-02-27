@@ -9,7 +9,7 @@ class AutomationPipelines:
     '''
 
     def __init__(self):
-        # print('in AutomationPipelines...')
+        # # print('in AutomationPipelines...')
         self.con = self._conn = pymysql.connect(
             host=DBHOST, port=DBPORT,
             user=DBUSER, passwd=DBPWD,
@@ -20,11 +20,11 @@ class AutomationPipelines:
             write_timeout=5,
         )
         self.cur = self.con.cursor()
-        # print('连接成功...')
+        # # print('连接成功...')
 
     def data(self):
         try:
-            print('正在查询数据...')
+            # print('正在查询数据...')
             # 符合条件的旅行社
             sql = f"SELECT tid FROM dc_business_travel_setting WHERE partners='{DJ_NAME}'"
             self.cur.execute(sql)
@@ -55,7 +55,7 @@ class AutomationPipelines:
                     res_1 = self.cur.fetchone()
                     Undo = False
             if not res_1:
-                print('无需要提交数据')
+                # print('无需要提交数据')
                 return 0
             self.tid = res_1[5]
             if "五年" in res_1[3]:
@@ -71,14 +71,14 @@ class AutomationPipelines:
             self.cur.execute(sql)
             res_2 = self.cur.fetchone()
             if res_2 == ():
-                print('res_2 未查到数据')
+                # print('res_2 未查到数据')
                 return 0
             # 姓名，英文名 人数
             sql = f'SELECT username, english_name, english_name_s, COUNT(visa_id) FROM dc_travel_business_userinfo WHERE tvisa_id = "{self.tid}"'
             self.cur.execute(sql)
             res_3 = self.cur.fetchone()
             if res_1 == ():
-                print('res_3 未查到数据')
+                # print('res_3 未查到数据')
                 return 0
 
             # 查证信息
@@ -111,8 +111,9 @@ class AutomationPipelines:
                 self.down_data = ()
                 return 1
         except Exception as e:
-            print('人员信息查询失败！')
-            print(e, '\n人员信息查询失败！...')
+            pass
+            # print('人员信息查询失败！')
+            # print(e, '\n人员信息查询失败！...')
 
         try:
             sql = 'SELECT username, english_name, english_name_s, sex, live_address, date_of_birth, passport_number, ' \
@@ -121,7 +122,7 @@ class AutomationPipelines:
             self.cur.execute(sql)
             res_info = self.cur.fetchall()
             if res_info == ():
-                print('res_info 未查到数据')
+                # print('res_info 未查到数据')
                 return 0
             res_in = list(res_info)
             res_info = []
@@ -148,8 +149,9 @@ class AutomationPipelines:
                 return 1
 
         except Exception as e:
-            print('in res_info error')
-            print(e, '\n需要的提交表格数据查询失败！...')
+            pass
+            # print('in res_info error')
+            # print(e, '\n需要的提交表格数据查询失败！...')
 
         try:
             sql = f"SELECT flight_name, originating_place, start_time, destination, stop_time " \
@@ -157,7 +159,7 @@ class AutomationPipelines:
             self.cur.execute(sql)
             res_4 = self.cur.fetchone()
             if not res_4:
-                print('res_4 未查到数据')
+                # print('res_4 未查到数据')
                 self.down_data = ('', '', '', '', '', '',
                                   '', '', '', '', '', '', '')
                 return 1
@@ -168,8 +170,9 @@ class AutomationPipelines:
 
             m_f = {1: 0, 2: 0}
         except Exception as e:
-            print('归国报告数据查询失败！')
-            print(e, '归国报告数据查询失败！...')
+            pass
+            # print('归国报告数据查询失败！')
+            # print(e, '归国报告数据查询失败！...')
 
         return 1
 
@@ -239,16 +242,16 @@ class AutomationPipelines:
 
             self.con.commit()
         except Exception:
-            print('数据库执行出错, 进行回滚...')
+            # print('数据库执行出错, 进行回滚...')
             self.con.rollback()
 
     def __del__(self):
-        # print('\n数据库正在关闭连接')
+        # # print('\n数据库正在关闭连接')
         if hasattr(self, "cur"):
             self.cur.close()
         if hasattr(self, "con"):
             self.con.close()
-        # print('数据库已关闭连接\n')
+        # # print('数据库已关闭连接\n')
 
 
 if __name__ == "__main__":

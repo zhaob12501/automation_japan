@@ -28,10 +28,10 @@ class Download:
 
     # 1、 进入搜索信息搜索列表，并搜索指定ID
     def search_info(self):
-        print('进入搜索信息搜索列表，并搜索指定ID')
-        print(self.LOG_DATA[8])
+        # print('进入搜索信息搜索列表，并搜索指定ID')
+        # print(self.LOG_DATA[8])
         if self.LOG_DATA[8]:
-            print('检索信息-有番号查询')
+            # print('检索信息-有番号查询')
             data = {
                 'CODE': self.LOG_DATA[8],
                 'PAGE_VIEW_NUMBER': '0',
@@ -42,19 +42,19 @@ class Download:
             reg = r'<a href="identity_info\.php\?IDENTITY_ID=(.*?)">{}</a>'.format(
                 self.LOG_DATA[8])
             self.identity_id = re.findall(reg, res.text)[0]
-            print('The Download first step to success!')
-            print(self.identity_id)
+            # print('The Download first step to success!')
+            # print(self.identity_id)
         else:
             # 1、 进入搜索信息搜索列表，并搜索指定ID
-            print('检索信息-无番号查询')
+            # print('检索信息-无番号查询')
             try:
                 res = self.req.get(self.identity_list_url)
                 if res.url == self.login_url:
                     raise AutomationError('登陆失效...')
                 self.identity_id = res.text.split(self.info, 1)[1].split(
                     '<tr class="', 1)[1].split('"', 1)[0][-7:]
-                print('The Download first step to success!')
-                print(self.identity_id)
+                # print('The Download first step to success!')
+                # print(self.identity_id)
 
             except Exception:
                 for i in range(1, 21):
@@ -66,14 +66,13 @@ class Download:
                     try:
                         self.identity_id = res.text.split(self.info, 1)[1].split(
                             '<tr class="', 1)[1].split('"', 1)[0][-7:]
-                        print('The Download first step to success!')
+                        # print('The Download first step to success!')
                         self.get_url = url
                         break
                     except Exception:
                         continue
-                else:
-                    print(
-                        'Your records are too old. Please resubmit your information!...')
+                # else:
+                    # print('Your records are too old. Please resubmit your information!...')
 
     def identity_return(self):
         url = self.id_r_e_url.format(self.identity_id)
@@ -82,7 +81,7 @@ class Download:
         if res.url == self.login_url:
             raise AutomationError('登陆失效...')
 
-        print('The Download second step is successful')
+        # print('The Download second step is successful')
         reg = '<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
 
@@ -128,7 +127,7 @@ class Download:
             raise AutomationError('登陆失效...')
         reg = r'<input type="hidden" value="(.*?)"  name="_PAGE_KEY" />'
         self._PAGE_KEY = re.findall(reg, res.text)[0]
-        print('The Download third step is successful')
+        # print('The Download third step is successful')
 
         data = {
             "_PAGE_KEY": self._PAGE_KEY,
@@ -145,7 +144,7 @@ class Download:
 
         self.down_url = res.text.split(
             "window.open('.")[1].split("', '_blank');")[0]
-        print('Download the fourth step is successful')
+        # print('Download the fourth step is successful')
 
     def down(self):
         url = 'https://churenkyosystem.com/member' + self.down_url
@@ -160,12 +159,12 @@ class Download:
         if res.json()['status'] == 1:
             self.auPipe.update(tid=self.LOG_DATA[7], status='3', submit_status='222')
 
-            print('-' * 20, '\nthe info is OK\n', '-' * 20)
+            # print('-' * 20, '\nthe info is OK\n', '-' * 20)
             with open(os.path.join(LOG_DIR, f'{DAY()}.json'), 'a') as f:
                 log = {'归国': "", 'time': strftime('%m/%d %H:%M:%S')}
                 json.dump(log, f)
                 f.write(',\n')
-            print('归国报告书下载OK\n')
+            # print('归国报告书下载OK\n')
         else:
             self.auPipe.update(tid=self.LOG_DATA[7], status='2')
 
@@ -186,7 +185,7 @@ class Download:
         except AutomationError:
             raise AutomationError('登陆失效, 重新登陆...', "automation_download")
         except Exception as e:
-            print('automation_download 出现错误...')
+            # print('automation_download 出现错误...')
             ERRINFO(self.LOG_DATA[7], self.LOG_DATA[1],
                     "automation_download", e)
             raise AutomationError(e, "automation_download")
